@@ -44,11 +44,13 @@ class Node(rclpy.node.Node):
         :param node_name: The name of the node.
         """
         super().__init__(node_name)
-        threading.Thread(target=self.run).start()
 
     @abstractmethod
     def run(self):
         pass
+
+    def start(self):
+        threading.Thread(target=self.run).start()
 
 
 def create_node(node_name: str) -> rclpy.node.Node:

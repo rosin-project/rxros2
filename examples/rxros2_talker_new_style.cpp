@@ -64,7 +64,9 @@ struct Talker: public rxros2::Node {
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<Talker>());
+    auto talker = std::make_shared<Talker>();
+    talker->start();
+    rclcpp::spin(talker);
     rclcpp::shutdown();
     return 0;
 }

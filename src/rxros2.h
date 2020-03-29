@@ -62,14 +62,16 @@ namespace rxros2
          *
          * @param node_name The name of the node.
          */
-        Node(const std::string& node_name): rclcpp::Node(node_name) {
-            std::thread trd([this]() { this->run(); });
-            trd.detach();
-        };
+        Node(const std::string& node_name): rclcpp::Node(node_name) {}
         ~Node() = default;
 
         /// run is an abstract method that should be implemented by a sub-class of rxros2::Node.
         virtual void run() = 0;
+
+        void start() {
+            std::thread trd([this]() { this->run(); });
+            trd.detach();
+        }
     }; // end of class Node
 
     /// create_node is a simple wrapper function that will create a shared_ptr instance of the rclcpp::Node

@@ -46,6 +46,7 @@ class Listener(rxros2.Node):
 def main(args=None):
     rclpy.init(args=args)
     listener = Listener()
+    listener.start()
     rclpy.spin(listener)
     listener.destroy_node()
     rclpy.shutdown()

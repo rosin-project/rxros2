@@ -43,7 +43,9 @@ struct Listener: public rxros2::Node {
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<Listener>());
+    auto listener = std::make_shared<Listener>();
+    listener->start();
+    rclcpp::spin(listener);
     rclcpp::shutdown();
     return 0;
 }

@@ -52,6 +52,7 @@ class Talker(rxros2.Node):
 def main(args=None):
     rclpy.init(args=args)
     talker = Talker()
+    talker.start()
     rclpy.spin(talker)
     talker.destroy_node()
     rclpy.shutdown()
