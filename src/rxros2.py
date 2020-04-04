@@ -27,6 +27,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import threading
+import os
+import select
+import struct
 import rclpy
 from abc import abstractmethod
 from rx import *
@@ -76,6 +79,32 @@ def from_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_si
     def subscribe(observer, scheduler=None) -> Disposable:
         node.create_subscription(topic_type, topic_name, lambda msg: observer.on_next(msg), queue_size)
         return observer
+    return create(subscribe)
+
+
+def from_device(device_name: str, struct_format: str) -> Observable:
+    """
+    The from_topic function creates an observable data stream from a linux device driver (e.g. /dev/input/event1).
+
+    :param device_name: The name of the Linux device driver (e.g /dev/input/event1 for keyboard events)
+    :param struct_format: The format of the events of the specified device driver (e.g. 'llHHI')
+    :return: An observable data of events from the specified device driver.
+             The events can be unpacked means of the function struct.unpack(struct_format, event)
+    """
+    def run(observer):
+        fd = os.open(device_name, os.O_RDONLY | os.O_NONBLOCK)
+        sz = struct.calcsize(struct_format)
+        while rclpy.ok():
+            select.select([fd], [], [])
+            event = os.read(fd, sz)
+            observer.on_next(event)
+        os.close(fd)
+        observer.on_completed()
+
+    def subscribe(observer, scheduler=None) -> Disposable:
+        threading.Thread(run(observer)).start()
+        return observer
+
     return create(subscribe)
 
 
