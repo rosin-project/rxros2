@@ -126,8 +126,8 @@ The pipe operator “|” is a specialty of RxCpp that is used as a simple mecha
 #### Syntax
 
 ```cpp
-auto rxros2::observable::from_topic<topic_type>(rxros2::Node* node, const std::string& topic_name, const uint32_t queue_size = 10);
-auto rxros2::observable::from_topic<topic_type>(rclcpp::Node node, const std::string& topic_name, const uint32_t queue_size = 10);
+auto rxros2::observable::from_topic<topic_type>(rclcpp::Node* node, const std::string& topic_name, const uint32_t queue_size = 10);
+auto rxros2::observable::from_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
 ```
 
 #### Example 1
@@ -185,7 +185,7 @@ The example below shows what it takes to turn a stream of low-level joystick eve
 #### Syntax
 
 ```cpp
-auto rxros::observable::from_device<device_type>(const std::string& device_name);
+auto rxros2::observable::from_device<device_type>(const std::string& device_name);
 ```
 
 #### Example
@@ -222,21 +222,28 @@ send transform broadcasts or even publish the messages to other topics.
 ##### Syntax:
 
 ```cpp
-auto rxros::operators::publish_to_topic<topic_type>(rxros2::Node node, const std::string &topic_name, const uint32_t queue_size = 10);
+auto rxros2::operators::publish_to_topic<topic_type>(rclcpp::Node* node, const std::string& topic_name, const uint32_t queue_size = 10);
+auto rxros2::operators::publish_to_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
 ```
 
 ##### Example:
 
 ```cpp
+struct JoystickPublisher: public rxros2::Node {
+    JoystickPublisher(): rxros2::Node("joystick_publisher") {}
+
+    void run() {
+      rxros2::observable::from_device<joystick_event>("/dev/input/js0")
+          | map(joystickEvent2JoystickMsg)
+          | publish_to_topic<teleop_msgs::Joystick>(joystick_publisher, "/joystick");
+    }
+};
+
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
-    auto joystick_publisher = rxros2::create_node("joystick_publisher");
-    //...
-    rxros2::observable::from_device<joystick_event>("/dev/input/js0")
-        | map(joystickEvent2JoystickMsg)
-        | publish_to_topic<teleop_msgs::Joystick>(joystick_publisher, "/joystick");
-    //...
-    rclcpp::spin(velocity_publisher);
+    auto joystick_publisher = std::make_shared<JoystickPublisher>();
+    joystick_publisher->start();
+    rclcpp::spin(joystick_publisher);
     rclcpp::shutdown();
     return 0;
 }
