@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
 
 ## Example 1: A Keyboard Publisher
 
-The following example is a full implementation of a keyboard publisher that takes input from a Linux block device and publishes the low-level keyboard events to a ROS topic '/keyboard'. For more information see [rxros2_examples](https://github.com/rosin-project/rxros2_examples).
+The following example is a full implementation of a keyboard publisher that takes input from a Linux block device and publishes the low-level keyboard events to a ROS2 topic '/keyboard'.
 
 ```cpp
 #include <rxros/rxros2.h>
@@ -296,7 +296,9 @@ int main(int argc, char** argv)
     rclcpp::init(argc, argv);
     auto keyboard_publisher = rxros2::create_node("keyboard_publisher");
 
-    const auto keyboardDevice = rxros2::parameter::get("/keyboard_publisher/device", "/dev/input/event1");
+    std::string keyboardDevice;
+    keyboard_publisher->declare_parameter("/keyboard_publisher/device", "/dev/input/event1");
+    keyboard_publisher->get_parameter("/keyboard_publisher/device", keyboardDevice);
 
     auto keyboardEvent2KeyboardMsg = [](const auto keyboardEvent) {
         auto makeKeyboardMsg = [=] (auto event) {
@@ -333,7 +335,7 @@ int main(int argc, char** argv)
 
 The following example is a full implementation of a velocity publisher
 that takes input from a keyboard and joystick and publishes Twist messages
-on the /cmd_vel topic. For more information see [rxros2_examples](https://github.com/rosin-project/rxros2_examples).
+on the /cmd_vel topic.
 
 ```cpp
 #include <rxros/rxros2.h>
@@ -345,7 +347,8 @@ on the /cmd_vel topic. For more information see [rxros2_examples](https://github
 
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "velocity_publisher"); // Name of this node.
+    rclcpp::init(argc, argv);
+    auto keyboard_publisher = rxros2::create_node("velocity_publisher");
 
     const auto frequencyInHz = rxros2::Parameter::get("/velocity_publisher/frequency", 10.0); // hz
     const auto minVelLinear = rxros2::Parameter::get("/velocity_publisher/min_vel_linear", 0.04); // m/s
@@ -393,17 +396,19 @@ int main(int argc, char** argv) {
         vel.angular.z = std::get<1>(velTuple);
         return vel;};
 
-    auto joyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Joystick>("/joystick") // create an Observable stream from "/joystick" topic
+    auto joyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Joystick>(velocity_publisher, "/joystick") // create an Observable stream from "/joystick" topic
         | map([](teleop_msgs::Joystick joy) { return joy.event; });
-    auto keyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Keyboard>("/keyboard") // create an Observable stream from "/keyboard" topic
+    auto keyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Keyboard>(velocity_publisher, "/keyboard") // create an Observable stream from "/keyboard" topic
         | map([](teleop_msgs::Keyboard key) { return key.event; });
-    joyObsrv.merge(keyObsrv)                                  // merge the joystick and keyboard messages into an Observable teleop stream.
-        | scan(std::make_tuple(0.0, 0.0), teleop2VelTuple)    // turn the teleop stream into a linear and angular velocity stream.
-        | map(velTuple2TwistMsg)                              // turn the linear and angular velocity stream into a Twist stream.
-        | sample_with_frequency(frequencyInHz)                // take latest Twist msg and populate it with the specified frequency.
-        | publish_to_topic<geometry_msgs::Twist>("/cmd_vel"); // publish the Twist messages to the topic "/cmd_vel"
+    joyObsrv.merge(keyObsrv)                                                      // merge the joystick and keyboard messages into an Observable teleop stream.
+        | scan(std::make_tuple(0.0, 0.0), teleop2VelTuple)                        // turn the teleop stream into a linear and angular velocity stream.
+        | map(velTuple2TwistMsg)                                                  // turn the linear and angular velocity stream into a Twist stream.
+        | sample_with_frequency(frequencyInHz)                                    // take latest Twist msg and populate it with the specified frequency.
+        | publish_to_topic<geometry_msgs::Twist>(velocity_publisher, "/cmd_vel"); // publish the Twist messages to the topic "/cmd_vel"
 
     rxros2::Logging().info() << "Spinning velocity_publisher ...";
-    ros::spin()();
+    rclcpp::spin(keyboard_publisher);
+    rclcpp::shutdown();
+    return 0;
 }
 ```
