@@ -369,7 +369,7 @@ def main(args=None):
 
 ```python
 import rclpy
-from rxpy2_talker import rxros2
+import rxros2
 from std_msgs.msg import String
 
 
