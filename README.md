@@ -57,7 +57,7 @@ TBD
 
 A RxROS2 node is fundamentally a ROS 2 node. It can be created in two distinct ways: Either by means of creating a class that is a sub-class of a `rxros2::Node` or by using the function `rxros2::create_node`.
 
-### Creating a RxROS2 Node using a class
+### Creating a RxROS2 Node using a Class
 
 The following code shows how a RxROS2 node is created using a class:
 
