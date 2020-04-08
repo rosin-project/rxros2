@@ -10,24 +10,27 @@ RxROS2 is new API for ROS 2 based on the paradigm of reactive programming. React
       * [Introduction](#introduction)
       * [Acknowledgement](#acknowledgement)
       * [Example Package](#example-package)
-      * [Setup and installation](#setup-and-installation)
+      * [Setup and Installation](#setup-and-installation)
       * [Creating a RxROS2 Node](#creating-a-rxros2-node)
+          * [Creating a RxROS2 Node using a Class](#creating-a-rxros2-node-using-a-class)
+          * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
       * [Observables](#observables)
          * [Observable from a Topic](#observable-from-a-topic)
-            * [Syntax](#syntax-3)
-            * [Example](#example-4)
+            * [Syntax](#syntax)
+            * [Example](#example)
+            * [Example](#example-2)
          * [Observable from a Linux device](#observable-from-a-linux-device)
-            * [Syntax](#syntax-5)
-            * [Example](#example-5)
+            * [Syntax](#syntax-1)
+            * [Example](#example-3)
       * [Operators](#operators)
          * [Publish to Topic](#publish-to-topic)
-            * [Syntax:](#syntax-7)
-            * [Example:](#example-7)
+            * [Syntax:](#syntax-2)
+            * [Example:](#example-4)
          * [Call Service](#call-service)
-            * [Syntax:](#syntax-9)
+            * [Syntax:](#syntax-3)
          * [Sample with Frequency](#sample-with-frequency)
-            * [Syntax:](#syntax-10)
-            * [Example:](#example-8)
+            * [Syntax:](#syntax-4)
+            * [Example:](#example-5)
       * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
       * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
 
@@ -50,11 +53,11 @@ TBD
 
 TBD
 
-## Creating a RXOS2 Node
+## Creating a RxROS2 Node
 
 A RxROS2 node is fundamentally a ROS 2 node. It can be created in two distinct ways: Either by means of creating a class that is a sub-class of a `rxros2::Node` or by using the function `rxros2::create_node`.
 
-### Creating a RXOS2 Node by using a class
+### Creating a RxROS2 Node using a Class
 
 The following code shows how a RxROS2 node is created using a class:
 
@@ -86,7 +89,7 @@ MyNode is defined as `struct` rather than a `class` to take advantage of that al
 
 The main function is straight forward: It first initialize rclcpp. Then it creates an instance of MyNode and executes the `start` function. The `start` function will execute the `run` function of MyNode in a new thread. It is possible to call `run` directly from the main function simply by executing `my_node->run()`. But be sure in this case that the `run` function is not blocking or else the `rclcpp::spin` function is not called. `rclcpp::spin` is needed in order to publish and listen to ROS 2 topics. `rclcpp::shutdown` is finally called to terminate the node in case the `rclcpp::spin` function has been terminated.
 
-### Creating a RXOS2 Node using the create_node function
+### Creating a RxROS2 Node using the create_node function
 
 The other other way to create a RxROS2 node is by using the function call `rxros2::create_node`. This is done as follows:
 
@@ -126,7 +129,7 @@ auto rxros2::observable::from_topic<topic_type>(rclcpp::Node* node, const std::s
 auto rxros2::observable::from_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
 ```
 
-#### Example 1
+#### Example
 
 ```cpp
 struct VelocityPublisher: public rxros2::Node {
@@ -152,7 +155,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-#### Example 2
+#### Example
 
 ```cpp
 int main(int argc, char **argv) {
