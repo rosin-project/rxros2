@@ -11,8 +11,8 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Acknowledgement](#acknowledgement)
    * [Example Package](#example-package)
    * [Setup and Installation](#setup-and-installation)
-   * [Creating a RxROS2 Node](#creating-a-rxros2-node)
-       * [Creating a RxROS2 Node using a Class](#creating-a-rxros2-node-using-a-class)
+   * [Creating a RXOS2 Node](#creating-a-rxros2-node)
+       * [Creating a RxROS2 Node using a class](#creating-a-rxros2-node-using-a-class)
        * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
    * [Observables](#observables)
       * [Observable from a Topic](#observable-from-a-topic)
@@ -50,11 +50,11 @@ TBD
 
 TBD
 
-## Creating a RXOS2 Node
+## Creating a RxROS2 Node
 
 A RxROS2 node is fundamentally a ROS2 node. It can be created in two distinct ways: Either by means of creating a class that is a sub-class of a `rxros2.Node` or by using the function `rxros2.create_node`.
 
-### Creating a RXOS2 Node by using a class
+### Creating a RxROS2 Node by using a class
 
 The following code shows how a RxROS2 node is created using a class:
 
@@ -84,7 +84,7 @@ MyNode is further defined as a  `rxros2.Node`. The `rxros2.Node` is a very simpl
 
 The main function is straight forward: It first initialize rclpy. Then it creates an instance of MyNode and executes the `start` function. The `start` function will execute the `run` function of MyNode in a new thread. It is possible to call `run` directly from the main function simply by executing `my_node.run()`. But be sure in this case that the `run` function is not blocking or else the `rclpy.spin` function is not called. `rclpy.spin` is needed in order to publish and listen to ROS2 topics. `rclpy.spin` is a blocking function that will continue to run until it is stopped/terminated. In this case `my_node.destry_node` and `rclpy.shutdown` are called to terminate the node.
 
-### Creating a RXOS2 Node using the create_node function
+### Creating a RxROS2 Node using the create_node function
 
 The other other way to create a RxROS2 node is by using the function call `rxros2.create_node`. This is done as follows:
 
