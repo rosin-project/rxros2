@@ -327,18 +327,15 @@ int main(int argc, char** argv)
         | map(keyboardEvent2KeyboardMsg)
         | publish_to_topic<teleop_msgs::Keyboard>(keyboard_publisher, "/keyboard");
 
-    rclcpp::spin(joystick_publisher);
+    rclcpp::spin(keyboard_publisher);
     rclcpp::shutdown();
     return 0;
 }
-
 ```
 
 ## Example 2: A Velocity Publisher
 
-The following example is a full implementation of a velocity publisher
-that takes input from a keyboard and joystick and publishes Twist messages
-on the /cmd_vel topic.
+The following example is a full implementation of a velocity publisher that takes input from a keyboard and joystick and publishes Twist messages on the /cmd_vel topic.
 
 ```cpp
 #include <rxros/rxros2.h>
@@ -351,21 +348,31 @@ on the /cmd_vel topic.
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto keyboard_publisher = rxros2::create_node("velocity_publisher");
+    auto velocity_publisher = rxros2::create_node("velocity_publisher");
 
-    const auto frequencyInHz = rxros2::Parameter::get("/velocity_publisher/frequency", 10.0); // hz
-    const auto minVelLinear = rxros2::Parameter::get("/velocity_publisher/min_vel_linear", 0.04); // m/s
-    const auto maxVelLinear = rxros2::Parameter::get("/velocity_publisher/max_vel_linear", 0.10); // m/s
-    const auto minVelAngular = rxros2::Parameter::get("/velocity_publisher/min_vel_angular", 0.64); // rad/s
-    const auto maxVelAngular = rxros2::Parameter::get("/velocity_publisher/max_vel_angular", 1.60); // rad/s
-    const auto deltaVelLinear = (maxVelLinear - minVelLinear) / 10.0;
-    const auto deltaVelAngular = (maxVelAngular - minVelAngular) / 10.0;
+    float frequencyInHz;
+    velocity_publisher->declare_parameter("/velocity_publisher/frequency", 10.0); /hz
+    velocity_publisher->get_parameter("/velocity_publisher/frequency", );
+    float min_vel_linear;
+    velocity_publisher->declare_parameter("/velocity_publisher/min_vel_linear", 10.00); // m/s
+    velocity_publisher->get_parameter("/velocity_publisher/min_vel_linear", );
+    float max_vel_linear;
+    velocity_publisher->declare_parameter("/velocity_publisher/max_vel_linear", 10.00); // m/s
+    velocity_publisher->get_parameter("/velocity_publisher/max_vel_linear", );
+    float min_vel_angular;
+    velocity_publisher->declare_parameter("/velocity_publisher/min_vel_angular", 10.00); // rad/s
+    velocity_publisher->get_parameter("/velocity_publisher/min_vel_angular", );
+    float max_vel_angular;
+    velocity_publisher->declare_parameter("/velocity_publisher/max_vel_angular", 10.00); // rad/s
+    velocity_publisher->get_parameter("/velocity_publisher/max_vel_angular", );
+    float deltaVelLinear = (maxVelLinear - minVelLinear) / 10.0;
+    float deltaVelAngular = (maxVelAngular - minVelAngular) / 10.0;
 
-    rxros2::Logging().info() << "frequency: " << frequencyInHz;
-    rxros2::Logging().info() << "min_vel_linear: " << minVelLinear << " m/s";
-    rxros2::Logging().info() << "max_vel_linear: " << maxVelLinear << " m/s";
-    rxros2::Logging().info() << "min_vel_angular: " << minVelAngular << " rad/s";
-    rxros2::Logging().info() << "max_vel_angular: " << maxVelAngular << " rad/s";
+    RCLCPP_INFO(velocity_publisher->get_logger(), "frequency: %f", frequencyInHz);
+    RCLCPP_INFO(velocity_publisher->get_logger(), "min_vel_linear: %f m/s", minVelLinear);
+    RCLCPP_INFO(velocity_publisher->get_logger(), "max_vel_linear: %f m/s", maxVelLinear);
+    RCLCPP_INFO(velocity_publisher->get_logger(), "min_vel_angular: %f rad/s", minVelAngular);
+    RCLCPP_INFO(velocity_publisher->get_logger(), "max_vel_angular: %f rad/s", maxVelAngular);
 
     auto adaptVelocity = [=] (auto newVel, auto minVel, auto maxVel, auto isIncrVel) {
         if (newVel > maxVel)
@@ -409,8 +416,8 @@ int main(int argc, char** argv) {
         | sample_with_frequency(frequencyInHz)                                    // take latest Twist msg and populate it with the specified frequency.
         | publish_to_topic<geometry_msgs::Twist>(velocity_publisher, "/cmd_vel"); // publish the Twist messages to the topic "/cmd_vel"
 
-    rxros2::Logging().info() << "Spinning velocity_publisher ...";
-    rclcpp::spin(keyboard_publisher);
+    RCLCPP_INFO(velocity_publisher->get_logger(), "Spinning velocity_publisher ...");
+    rclcpp::spin(velocity_publisher);
     rclcpp::shutdown();
     return 0;
 }
