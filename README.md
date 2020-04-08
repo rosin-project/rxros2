@@ -17,8 +17,8 @@ RxROS2 is new API for ROS 2 based on the paradigm of reactive programming. React
       * [Observables](#observables)
          * [Observable from a Topic](#observable-from-a-topic)
             * [Syntax](#syntax-1)
-            * [Example 1](#example-1)
-            * [Example 2](#example-2)
+            * [Example](#example-1)
+            * [Example](#example-2)
          * [Observable from a Linux device](#observable-from-a-linux-device)
             * [Syntax](#syntax-2)
             * [Example](#example-3)
@@ -27,9 +27,9 @@ RxROS2 is new API for ROS 2 based on the paradigm of reactive programming. React
             * [Syntax:](#syntax-3)
             * [Example:](#example-4)
          * [Call Service](#call-service)
-            * [Syntax:](#syntax-3)
-         * [Sample with Frequency](#sample-with-frequency)
             * [Syntax:](#syntax-4)
+         * [Sample with Frequency](#sample-with-frequency)
+            * [Syntax:](#syntax-5)
             * [Example:](#example-5)
       * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
       * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
@@ -129,7 +129,7 @@ auto rxros2::observable::from_topic<topic_type>(rclcpp::Node* node, const std::s
 auto rxros2::observable::from_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
 ```
 
-#### Example 1
+#### Example
 
 ```cpp
 struct VelocityPublisher: public rxros2::Node {
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-#### Example 2
+#### Example
 
 ```cpp
 int main(int argc, char **argv) {
