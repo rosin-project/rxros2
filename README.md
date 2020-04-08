@@ -16,7 +16,7 @@ RxROS2 is new API for ROS 2 based on the paradigm of reactive programming. React
           * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
       * [Observables](#observables)
          * [Observable from a Topic](#observable-from-a-topic)
-            * [Syntax](#syntax-1)
+            * [Syntax](#syntax)
             * [Example](#example-1)
             * [Example](#example-2)
          * [Observable from a Linux device](#observable-from-a-linux-device)
