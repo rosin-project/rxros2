@@ -212,7 +212,7 @@ One of the primary advantages of stream oriented processing is the fact that we 
 ##### Syntax:
 
 ```python
-def to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]
+def to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
 ```
 
 ##### Example:
