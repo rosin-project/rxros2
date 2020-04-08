@@ -29,8 +29,8 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
       * [Sample with Frequency](#sample-with-frequency)
          * [Syntax:](#syntax-3)
          * [Example:](#example-5)
-   * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
-   * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
+   * [Example 1: A Topic Listener](#example-1-a-topic-listener)
+   * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
 
 ## Acknowledgement
 
@@ -269,19 +269,127 @@ def main(args=None):
 }
 ```
 
-## Example 1: A Keyboard Publisher
+## Example 1: A Topic Listener
 
-The following example is a full implementation of a keyboard publisher that takes input from a Linux block device and publishes the low-level keyboard events to a ROS2 topic '/keyboard'.
+The following example is a full implementation of a ROS2 topic listener using RxROS2. It comes in two flavors: One using a dedicated class implementation and one using the rxros2.create_node function
+
+### Example 1a: A Topic Listener using a dedicated class implementation
 
 ```python
+import rclpy
+import rxros2
+from std_msgs.msg import String
+
+
+class Listener(rxros2.Node):
+    def __init__(self):
+        super().__init__("listener")
+
+    def run(self):
+        observable = rxros2.from_topic(self, String, "/chatter")
+        observable.subscribe(
+            lambda s: print("Received {0}".format(s.data)),
+            lambda e: print("Error Occurred: {0}".format(e)),
+            lambda: print("Done!"))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    listener = Listener()
+    listener.start()
+    rclpy.spin(listener)
+    listener.destroy_node()
+    rclpy.shutdown()
 ```
 
-## Example 2: A Velocity Publisher
-
-The following example is a full implementation of a velocity publisher
-that takes input from a keyboard and joystick and publishes Twist messages
-on the /cmd_vel topic.
+### Example 1b: A Topic Listener using the rxros2.create_node function
 
 ```python
-}
+import rclpy
+import rxros2
+from std_msgs.msg import String
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    listener = rxros2.create_node("listener")
+
+    observable = rxros2.from_topic(listener, String, "/chatter")
+    observable.subscribe(
+        lambda s: print("Received2 {0}".format(s.data)),
+        lambda e: print("Error Occurred: {0}".format(e)),
+        lambda: print("Done!"))
+
+    rclpy.spin(listener)
+    listener.destroy_node()
+    rclpy.shutdown()
+
+```
+
+## Example 2: A Topic Publisher
+
+The following example is a full implementation of a ROS2 topic publisher using RxROS2. It comes again in two flavors: One using a dedicated class implementation and one using the rxros2.create_node function
+
+### Example 2a: A Topic Publisher using a dedicated class implementation
+
+```python
+import rclpy
+import rxros2
+from std_msgs.msg import String
+
+
+def mk_msg(s) -> String:
+    msg = String()
+    msg.data = s
+    return msg
+
+
+class Publisher(rxros2.Node):
+    def __init__(self):
+        super().__init__("publisher")
+
+    def run(self):
+        rxros2.interval(1.0).pipe(
+            rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
+            rxros2.do_action(lambda s: print("Send {0}".format(s.data))),
+            rxros2.sample_with_frequency(2.0),
+            rxros2.to_topic(self, String, "/chatter"))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher = Publisher()
+    publisher.start()
+    rclpy.spin(publisher)
+    publisher.destroy_node()
+    rclpy.shutdown()
+```
+
+### Example 2b: A Topic Publisher using the rxros2.create_node function
+
+```python
+import rclpy
+from rxpy2_talker import rxros2
+from std_msgs.msg import String
+
+
+def mk_msg(s) -> String:
+    msg = String()
+    msg.data = s
+    return msg
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher = rxros2.create_node("publisher")
+
+    rxros2.interval(1.0).pipe(
+        rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
+        rxros2.do_action(lambda s: print("Send2 {0}".format(s.data))),
+        rxros2.sample_with_frequency(2.0),
+        rxros2.to_topic(publisher, String, "/chatter"))
+
+    rclpy.spin(publisher)
+    publisher.destroy_node()
+    rclpy.shutdown()
 ```
