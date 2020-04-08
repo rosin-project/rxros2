@@ -10,24 +10,26 @@ RxROS2 is new API for ROS 2 based on the paradigm of reactive programming. React
       * [Introduction](#introduction)
       * [Acknowledgement](#acknowledgement)
       * [Example Package](#example-package)
-      * [Setup and installation](#setup-and-installation)
+      * [Setup and Installation](#setup-and-installation)
       * [Creating a RxROS2 Node](#creating-a-rxros2-node)
+          * [Creating a RXOS2 Node using a Class](#creating-a-rxros2-node-class)
+          * [Creating a RXOS2 Node using the create_node Function](#creating-a-rxros2-node-using-function)
       * [Observables](#observables)
          * [Observable from a Topic](#observable-from-a-topic)
-            * [Syntax](#syntax-3)
-            * [Example](#example-4)
+            * [Syntax](#syntax-1)
+            * [Example](#example-1)
          * [Observable from a Linux device](#observable-from-a-linux-device)
-            * [Syntax](#syntax-5)
-            * [Example](#example-5)
+            * [Syntax](#syntax-2)
+            * [Example](#example-2)
       * [Operators](#operators)
          * [Publish to Topic](#publish-to-topic)
-            * [Syntax:](#syntax-7)
-            * [Example:](#example-7)
+            * [Syntax:](#syntax-3)
+            * [Example:](#example-3)
          * [Call Service](#call-service)
-            * [Syntax:](#syntax-9)
+            * [Syntax:](#syntax-3)
          * [Sample with Frequency](#sample-with-frequency)
-            * [Syntax:](#syntax-10)
-            * [Example:](#example-8)
+            * [Syntax:](#syntax-5)
+            * [Example:](#example-5)
       * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
       * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
 
@@ -54,7 +56,7 @@ TBD
 
 A RxROS2 node is fundamentally a ROS 2 node. It can be created in two distinct ways: Either by means of creating a class that is a sub-class of a `rxros2::Node` or by using the function `rxros2::create_node`.
 
-### Creating a RXOS2 Node by using a class
+### Creating a RXOS2 Node using a class
 
 The following code shows how a RxROS2 node is created using a class:
 
