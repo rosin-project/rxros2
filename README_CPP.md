@@ -344,7 +344,8 @@ The following example is a full implementation of a velocity publisher that take
 #include <geometry_msgs/Twist.h>
 #include "JoystickPublisher.h"
 #include "KeyboardPublisher.h"
-
+using namespace rxcpp::operators;
+using namespace rxros2::operators;
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
