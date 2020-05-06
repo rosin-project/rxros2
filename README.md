@@ -38,7 +38,8 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
 ## Acknowledgement
 This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-https://rosin-project.eu
+![https://rosin-project.eu](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)
+
 
 ## Dependencies
 The RxROS2 library depends on and uses the following software:<br>
