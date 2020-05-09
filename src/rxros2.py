@@ -31,16 +31,17 @@ import os
 import select
 import struct
 import rclpy
+from rclpy.node import Node as ROS2Node
 from abc import abstractmethod
 from rx import *
 from rx.operators import *
 from rx.disposable import Disposable
 
 
-class Node(rclpy.node.Node):
+class Node(ROS2Node):
     def __init__(self, node_name: str):
         """
-        The constructor of a Node. It initialize the super class rxlcpp::Node and
+        The constructor of a Node. It initialize the super class rclpy.node.Node and
         spawns a new thread that executes the 'run' method. The 'run' method is abstract
         and must therefore be implemented by a sub-class of Node.
 
@@ -56,7 +57,7 @@ class Node(rclpy.node.Node):
         threading.Thread(target=self.run).start()
 
 
-def create_node(node_name: str) -> rclpy.node.Node:
+def create_node(node_name: str) -> ROS2Node:
     """
     create_node is a simple wrapper function that will create a new instance of a rclpy Node.
 
@@ -66,7 +67,7 @@ def create_node(node_name: str) -> rclpy.node.Node:
     return rclpy.create_node(node_name)
 
 
-def from_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Observable:
+def from_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Observable:
     """
     The from_topic function creates an observable data stream from a ROS2 topic.
 
@@ -108,7 +109,7 @@ def from_device(device_name: str, struct_format: str) -> Observable:
     return create(subscribe)
 
 
-def to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
     """
     The publish_to_topic is a special operator as it does not modify the message steam it operates on.
     However, it will take each message from the stream and publish it to a specific ROS2 topic.
