@@ -118,7 +118,7 @@ def from_device(device_name: str, struct_format: str) -> Observable:
     return create(_subscribe)
 
 
-def to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def publish_to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
     """
     The to_topic operator will take each message from the stream and publish it to a specific ROS2 topic.
 
@@ -128,7 +128,7 @@ def to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) ->
     :param queue_size: The size of the queue associated to ROS2 publisher.
     :return: The observable data stream it operates on, i.e. it is an identity operator.
     """
-    def _to_topic(source) -> Observable:
+    def _publish__to_topic(source) -> Observable:
         publisher = node.create_publisher(topic_type, topic_name, queue_size)
         source.subscribe(on_next=lambda msg: publisher.publish(msg))
         return source
