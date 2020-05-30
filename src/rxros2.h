@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <rxcpp/rx.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
 
 namespace rxros2
@@ -303,7 +304,7 @@ namespace rxros2
         }
 
 
-        /// call_service will send a request to a server node and return the responce as an observable data stream.
+        /// send_request will send a request to a server node and return the responce as an observable data stream.
         /**
          * ROS2 provides a request/response model that allows messages to be send from one node (request)
          * and handled by another node (response). It is a typical client-server mechanism that can be
@@ -321,7 +322,7 @@ namespace rxros2
          * @return a new observable message stream consisting of the responses from the services.
          */
         template<class T>
-        static auto call_service(rclcpp::Node* node, const std::string& service_name) {
+        static auto send_request(rclcpp::Node* node, const std::string& service_name) {
             return [=](auto&& source) {
                 return rxcpp::observable<>::create<std::shared_ptr<typename T::Response>>(
                     [=](rxcpp::subscriber<std::shared_ptr<typename T::Request>> subscriber) {
@@ -329,22 +330,15 @@ namespace rxros2
                         bool service_ok = true;
                         while (service_ok && !client->wait_for_service(std::chrono::seconds(1)))
                             service_ok = rclcpp::ok();
-                        if (service_ok) {
+                        if (service_ok)
                             source.subscribe(
                                 [=](const std::shared_ptr<typename T::Request> request) {
-                                    auto future = client->async_send_request(request);
-                                    if (rclcpp::spin_until_future_complete(node, future) == rclcpp::executor::FutureReturnCode::SUCCESS)
-                                        subscriber.on_next(future.get());
-                                    else
-                                        subscriber.on_error(rxros2::Exception::runtime_error(std::string("Client call failed"))); },
-                                [=](const std::exception_ptr error) { subscriber.on_error(error); },
-                                [=]() { subscriber.on_completed(); });
-                        }
+                                    subscriber.on_next(client->send_request(request));});
                         else
                             subscriber.on_error(rxros2::Exception::runtime_error(std::string("Client call interrupted while waiting for service")));});};
         }
 
-        /// call_service will send a request to a server node and return the responce as an observable data stream.
+        /// send_request will send a request to a server node and return the responce as an observable data stream.
         /**
         * ROS2 provides a request/response model that allows messages to be send from one node (request)
         * and handled by another node (response). It is a typical client-server mechanism that can be
@@ -362,8 +356,26 @@ namespace rxros2
         * @return a new observable message stream consisting of the responses from the services.
         */
         template<class T>
-        static auto call_service(std::shared_ptr<rclcpp::Node> node, const std::string& service_name) {
-            return call_service<T>(node.get(), service_name);
+        static auto send_request(std::shared_ptr<rclcpp::Node> node, const std::string& service_name) {
+            return send_request<T>(node.get(), service_name);
+        }
+
+
+        template<class T>
+        static auto send_goal(rclcpp::Node* node, const std::string& action_name) {
+            return [=](auto&& source) {
+                return rxcpp::observable<>::create<std::shared_ptr<typename T::Result>>(
+                    [=](rxcpp::subscriber<std::shared_ptr<typename T::Goal>> subscriber) {
+                        auto action_client = rclcpp_action::create_client<T>(node->get_node_base_interface(), node->get_node_graph_interface(), node->get_node_logging_interface(), node->get_node_waitables_interface(), action_name, nullptr);
+                        action_client->wait_for_action_server();
+                        source.subscribe(
+                            [=](const std::shared_ptr<typename T::Goal> goal) {
+                                subscriber.on_next(action_client->send_goal(goal));});});};
+        }
+
+        template<class T>
+        static auto send_goal(std::shared_ptr<rclcpp::Node> node, const std::string& action_name) {
+            return send_goal<T>(node.get(), action_name);
         }
     } // end namespace operators
 } // end namespace rxros2
