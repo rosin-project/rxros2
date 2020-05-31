@@ -128,11 +128,11 @@ def publish_to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_siz
     :param queue_size: The size of the queue associated to ROS2 publisher.
     :return: The observable data stream it operates on, i.e. it is an identity operator.
     """
-    def _publish__to_topic(source) -> Observable:
+    def _publish_to_topic(source) -> Observable:
         publisher = node.create_publisher(topic_type, topic_name, queue_size)
         source.subscribe(on_next=lambda msg: publisher.publish(msg))
         return source
-    return _to_topic
+    return _publish_to_topic
 
 
 def send_request(node: ROS2Node, service_type: Any, service_name: str) -> Callable[[Observable], Observable]:
