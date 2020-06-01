@@ -84,14 +84,6 @@ def from_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) 
     return create(_subscribe)
 
 
-def from_action(node: ROS2Node, action_type: Any, action_name: str) -> Observable:
-    def _subscribe(observer, scheduler=None) -> Disposable:
-        action_server = ActionServer(node, action_type, action_name, execute_callback)
-
-        return observer
-    return create(_subscribe)
-
-
 def from_device(device_name: str, struct_format: str) -> Observable:
     """
     The from_topic function creates an observable data stream from a linux device driver (e.g. /dev/input/event1).

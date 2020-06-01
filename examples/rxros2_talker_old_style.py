@@ -45,7 +45,7 @@ def main(args=None):
         rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
         rxros2.do_action(lambda s: print("Send2 {0}".format(s.data))),
         rxros2.sample_with_frequency(2.0),
-        rxros2.to_topic(talker, String, "/chatter"))
+        rxros2.publish_to_topic(talker, String, "/chatter"))
 
     rclpy.spin(talker)
     talker.destroy_node()

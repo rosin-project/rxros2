@@ -429,3 +429,20 @@ int main(int argc, char** argv) {
     return 0;
 }
 ```
+
+## Performance Measurements
+
+In this section we will take a closer look at the performance of RxROS2. The test will compare a minimal subscriber/publisher program written in RxROS2 and core ROS2. The test consists of two nodes that publish data and subscribe to data from the other node. The data contains a timestamp that will be updated at the moment the data is published and the latency will be calculated at the moment the other node receives the data. Besides the latency, CPU load, Memory consumption and number of used treads will be measured. Several tests will be performed with various amounts of data.
+
+### Test setup
+The tests will be performed on a RaspberryPi 4B with 4 Mbytes of RAM. The following software has been installed on the machine:
+
+* Ubuntu 18.04.4 server image.
+* ROS2 Eloquent Elusor (desktop version)
+* RxCpp v2
+* Latest version of RxROS2
+
+The software has been installed as is. There has been no changes to RaspberryPi 4B to boost performance. Nor has there been installed a special software to boost or optimize the . The Ubuntu 18.04.4 and ROS2 packages has been updated via the apt store to the latest version.
+
+### Test programs
+To measure CPU load and RAM consumption the Linux top command has been used. To measure the number of used 

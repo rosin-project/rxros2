@@ -31,7 +31,7 @@ class T1(rxros2.Node):
 
         rxros2.interval(0.05).pipe(
             rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bulb_data)),
-            rxros2.to_topic(self, Test, "/T1T"))
+            rxros2.publish_to_topic(self, Test, "/T1T"))
 
 
 def main(args=None):
