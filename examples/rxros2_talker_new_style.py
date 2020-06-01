@@ -46,7 +46,7 @@ class Talker(rxros2.Node):
             rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
             rxros2.do_action(lambda s: print("Send {0}".format(s.data))),
             rxros2.sample_with_frequency(2.0),
-            rxros2.to_topic(self, String, "/chatter"))
+            rxros2.publish_to_topic(self, String, "/chatter"))
 
 
 def main(args=None):
