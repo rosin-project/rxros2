@@ -560,16 +560,16 @@ int main(int argc, char **argv) {
 
 ### Test results
 
-|xxx|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
+|Test|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
 |---|---|---|---|---|---|---|---|---|
 |ros2 100B 40Hz|5.0|5.3|0.4|0.4|7|0.2527|1.0918|0.3690|
 |rxros2 100B 40Hz|5.3|5.6|0.4|0.5|8|0.3458|0.8041|0.3918|
-|                   
+||||||||||                   
 |ros2 1K 40Hz|5.3|5.3|0.4|0.4|7|0.2208|0.6157|0.3843|
 |rxros2 1K 40Hz|5.3|5.6|0.4|0.4|8|0.2353|0.7893|0.3904|
-|      
+||||||||||                   
 |ros2 1M 40Hz|36.4|37.1|0.6|0.6|7|5.5996|27.6453|11.8814|
 |rxros2 1M 40Hz|33.1|33.1|0.6|0.7|8|4.9858|29.7769|10.8161|
-|  
+||||||||||                   
 |ros2 16M 4Hz|33.4|35.1|3.0|3.4|7|48.3979|634.0808|82.0909|
 |rxros2 16M 4Hz|23.8|24.2|2.6|2.6|8|40.1948|97.8250|42.6458|
