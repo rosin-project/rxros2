@@ -33,14 +33,10 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
 
 ## Acknowledgement
+This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-The RxROS2 library depends on and uses the following software:<br>
-
-1. Ubuntu Bionic 18.04<br>
-2. ROS2 Eloquent Elusor<br>
-3. Reactive Python, RxPY v3.0.1<br>
-https://github.com/ReactiveX/RxPY<br>
-Released under the MIT license<br>
+![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
+[https://rosin-project.eu](https://rosin-project.eu)
 
 ## Example Package
 
@@ -86,7 +82,7 @@ The main function is straight forward: It first initialize rclpy. Then it create
 
 ### Creating a RxROS2 Node using the create_node function
 
-The other other way to create a RxROS2 node is by using the function call `rxros2.create_node`. This is done as follows:
+The other way to create a RxROS2 node is by using the function call `rxros2.create_node`. This is done as follows:
 
 ```python
 import rclpy
@@ -107,7 +103,7 @@ The `rxros2.create_node` takes the node name argument and the created node can b
 
 ## Observables
 
-Observables are asynchronous message streams. They are the fundamental data structure used by RxROS2. As soon as we have the observables RxROS2 and Rxpython will provide us with a number of functions and operators to manipulate the streams.
+Observables are asynchronous message streams. They are the fundamental data structure used by RxROS2. As soon as we have the observables RxROS2 and RxPy will provide us with a number of functions and operators to manipulate the streams.
 
 ### Observable from a Topic
 
@@ -203,16 +199,16 @@ def main(args=None):
 
 ### Operators
 
-One of the primary advantages of stream oriented processing is the fact that we can apply functional programming primitives on them. Rxpython operators are nothing but filters, transformations, aggregations and reductions of the observable message streams we created in the previous section.
+One of the primary advantages of stream oriented processing is the fact that we can apply functional programming primitives on them. RxPy operators are nothing but filters, transformations, aggregations and reductions of the observable message streams we created in the previous section.
 
 #### Publish to Topic
 
-`rxros2::operators::publish_to_topic` is a rather special operator. It does not modify the message steam - it is in other words an identity function/operator. It will however take each message from the stream and publish it to a specific topic. This means that it is perfectly possible to continue modifying the message stream after it has been published to a topic.
+`rxros2.publish_to_topic` is a rather special operator. It does not modify the message steam - it is in other words an identity function/operator. It will however take each message from the stream and publish it to a specific topic. This means that it is perfectly possible to continue modifying the message stream after it has been published to a topic.
 
 ##### Syntax:
 
 ```python
-def to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def publish_to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
 ```
 
 ##### Example:
@@ -238,11 +234,85 @@ def main(args=None):
     rclpy.shutdown()
 ```
 
+#### Send Request
+
+Besides the publish/subscribe model, ROS2 also provides a request/reply model that allows a remote procedure call (RPC) to be send from one node (request) and handled by another node (reply) - it is a typical client/server mechanism that can be useful in distributed systems.
+
+RxROS2 only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS2. To send a request the rxros2.send_request operator is called. It take a node, a service type and a service name as argument. The service type consists of a request and response part. The request part must be filled out prior to the service call and the result part will be a new observable stream that is returned by the send_request operator.
+
+##### Syntax:
+
+```python
+def send_request(node: rclpy.node.Node, service_type: Any, service_name: str) -> Callable[[Observable], Observable]:
+```
+
+##### Example: Service Client
+
+```python
+import rxros2
+import rclpy
+from example_interfaces.srv import AddTwoInts
+
+
+def mk_request(a, b) -> AddTwoInts.Request:
+    req = AddTwoInts.Request()
+    req.a = a
+    req.b = b
+    return req
+
+
+class ServiceClient(rxros2.Node):
+    def __init__(self):
+        super().__init__('service_client')
+
+    def run(self):
+        obs = rxros2.range(1, 10).pipe(
+            rxros2.map(lambda i: mk_request(i, i+1)),
+            rxros2.send_request(self, AddTwoInts, "add_two_ints"))
+        obs.subscribe(on_next=lambda response: print("Response {0}".format(response.sum)))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    service_client = ServiceClient()
+    service_client.run()
+    rclpy.spin(service_client)
+    service_client.destroy_node()
+    rclpy.shutdown()
+```
+
+##### Example: Service Server (plain ROS2 code)
+
+```python
+import rclpy
+from rclpy.node import Node
+from example_interfaces.srv import AddTwoInts
+
+
+class ServiceServer(Node):
+    def __init__(self):
+        super().__init__('service_server')
+        self.srv = self.create_service(AddTwoInts, 'add_two_ints', self.add_two_ints_callback)
+
+    def add_two_ints_callback(self, request, response):
+        response.sum = request.a + request.b
+        self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+        return response
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    service_server = ServiceServer()
+    rclpy.spin(service_server)
+    rclpy.shutdown()
+```
+
+
 ### Sample with Frequency
 
 The operator `rxros2.sample_with_frequency` will at regular intervals emit the last element or message of the observable message stream it was applied on - that is independent of whether it has changed or not. This means that the observable message stream produced by `rxros2.sample_with_frequency` may contain duplicated messages if the frequency is too high and it may miss messages in case the frequency is too low. This is the preferred way in ROS2 to publish messages on a topic and therefore a needed operation.
 
-The operation operator `rxros2.sample_with_frequency` comes in two variants. One that is executing in the current thread and one that is executing in a specified thread also known as a coordination in Rxpython.
+The operation operator `rxros2.sample_with_frequency` comes in two variants. One that is executing in the current thread and one that is executing in a specified thread also known as a coordination in RxPy.
 
 #### Syntax:
 
@@ -353,7 +423,7 @@ class Publisher(rxros2.Node):
             rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
             rxros2.do_action(lambda s: print("Send {0}".format(s.data))),
             rxros2.sample_with_frequency(2.0),
-            rxros2.to_topic(self, String, "/chatter"))
+            rxros2.publish_to_topic(self, String, "/chatter"))
 
 
 def main(args=None):
@@ -387,7 +457,7 @@ def main(args=None):
         rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
         rxros2.do_action(lambda s: print("Send2 {0}".format(s.data))),
         rxros2.sample_with_frequency(2.0),
-        rxros2.to_topic(publisher, String, "/chatter"))
+        rxros2.publish_to_topic(publisher, String, "/chatter"))
 
     rclpy.spin(publisher)
     publisher.destroy_node()
