@@ -442,7 +442,134 @@ The tests will be performed on a RaspberryPi 4B with 4 Mbytes of RAM. The follow
 * RxCpp v2
 * Latest version of RxROS2
 
-The software has been installed as is. There has been no changes to RaspberryPi 4B to boost performance. Nor has there been installed a special software to boost or optimize the . The Ubuntu 18.04.4 and ROS2 packages has been updated via the apt store to the latest version.
+The software has been installed as is. There has been no changes to RaspberryPi 4B to boost performance, nor has there been installed a special software to boost or optimize performance. The Ubuntu 18.04.4 and ROS2 packages has been updated via the Ubuntu package storage to the latest version.
 
 ### Test programs
-To measure CPU load and RAM consumption the Linux top command has been used. To measure the number of used 
+To measure CPU load and RAM consumption the Linux `top` command has been used. To measure the number of used threads the `/proc/<pid>/status` file has been used and to measure latency the following programs has been used:
+
+```cpp
+#include <cstdio>
+#include <chrono>
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+#include "ros2_msg/msg/test.hpp"
+using namespace std::chrono_literals;
+
+class T1 : public rclcpp::Node
+{
+private:
+    rclcpp::Subscription<ros2_msg::msg::Test>::SharedPtr subscription;
+    rclcpp::Publisher<ros2_msg::msg::Test>::SharedPtr publisher;
+    rclcpp::TimerBase::SharedPtr timer;
+    size_t msg_no;
+    const std::string bulk_data = std::string(1048576, '#');
+
+    static auto age_of(const rclcpp::Time& time) {
+        auto curr_time_nano = rclcpp::Clock().now().nanoseconds();
+        auto time_nano = time.nanoseconds();
+        return curr_time_nano-time_nano;
+    }
+
+    static auto mk_test_msg(const int msg_no, const std::string& data) {
+        ros2_msg::msg::Test msg;
+        msg.msg_no = msg_no;
+        msg.data = data;
+        msg.time_stamp = rclcpp::Clock().now();
+        return msg;
+    }
+
+public:
+    T1(): Node("T1"), msg_no(0) {
+        RCLCPP_INFO(this->get_logger(), "Starting CppNode T1:");
+
+        subscription = this->create_subscription<ros2_msg::msg::Test>( "/T2T", 10,
+            [this](ros2_msg::msg::Test::UniquePtr msg) {
+                RCLCPP_INFO(this->get_logger(), "%d,%d,%d", msg->msg_no, msg->data.length(), age_of(msg->time_stamp));
+            });
+
+        publisher = this->create_publisher<ros2_msg::msg::Test>("/T1T", 10);
+
+        auto timer_callback = [this]() -> void {
+            auto msg = mk_test_msg(this->msg_no++, this->bulk_data);
+            this->publisher->publish(msg);
+        };
+        timer = this->create_wall_timer(50ms, timer_callback);
+    }
+};
+
+
+int main(int argc, char * argv[])
+{
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<T1>());
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+And the equivalent program written in RxROS2:
+
+```cpp
+#include <cstdio>
+#include <rxros/rxros2.h>
+#include "std_msgs/msg/string.hpp"
+#include "ros2_msg/msg/test.hpp"
+using namespace rxcpp::operators;
+using namespace rxros2::operators;
+
+struct T2: public rxros2::Node {
+    T2(): rxros2::Node("T2") {};
+    const std::string bulk_data = std::string(1048576, '#');
+
+    static auto age_of(const rclcpp::Time& time) {
+        auto curr_time_nano = rclcpp::Clock().now().nanoseconds();
+        auto time_nano = time.nanoseconds();
+        return curr_time_nano-time_nano;
+    }
+
+    static auto mk_test_msg(const int msg_no, const std::string& data) {
+        ros2_msg::msg::Test msg;
+        msg.msg_no = msg_no;
+        msg.data = data;
+        msg.time_stamp = rclcpp::Clock().now();
+        return msg;
+    }
+
+    void run() {
+        RCLCPP_INFO(this->get_logger(), "Starting RxCppNode T2:");
+
+        rxros2::observable::from_topic<ros2_msg::msg::Test>(this, "/T1T")
+            .subscribe ( [this] (const ros2_msg::msg::Test::SharedPtr msg) {
+                RCLCPP_INFO(this->get_logger(), "%d,%d,%d", msg->msg_no, msg->data.length(), age_of(msg->time_stamp));});
+
+        rxcpp::observable<>::interval (std::chrono::milliseconds(50))
+            | map ([&](int i) { return mk_test_msg(i, bulk_data); })
+            | publish_to_topic<ros2_msg::msg::Test> (this, "/T2T");
+    }
+};
+
+int main(int argc, char **argv) {
+    rclcpp::init(argc, argv);
+    auto t2 = std::make_shared<T2>();
+    t2->start();
+    rclcpp::spin(t2);
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+### Test results
+
+|xxx|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
+|---|---|---|---|---|---|---|---|---|
+|ros2 100B 40Hz|5.0|5.3|0.4|0.4|7|0.2527|1.0918|0.3690|
+|rxros2 100B 40Hz|5.3|5.6|0.4|0.5|8|0.3458|0.8041|0.3918|
+|                   
+|ros2 1K 40Hz|5.3|5.3|0.4|0.4|7|0.2208|0.6157|0.3843|
+|rxros2 1K 40Hz|5.3|5.6|0.4|0.4|8|0.2353|0.7893|0.3904|
+|      
+|ros2 1M 40Hz|36.4|37.1|0.6|0.6|7|5.5996|27.6453|11.8814|
+|rxros2 1M 40Hz|33.1|33.1|0.6|0.7|8|4.9858|29.7769|10.8161|
+|  
+|ros2 16M 4Hz|33.4|35.1|3.0|3.4|7|48.3979|634.0808|82.0909|
+|rxros2 16M 4Hz|23.8|24.2|2.6|2.6|8|40.1948|97.8250|42.6458|
