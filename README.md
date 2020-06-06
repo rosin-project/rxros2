@@ -606,4 +606,4 @@ void run() {
 }
 ```
 
-The thread will however terminate very fast as the observable `from_topic` and `interval` are non-blocking. In fact, the `interval` observable is actually executing in a dedicated thread (scheduler), which means that topics will be published in a dedicated thread where as the spinner, subscription and processing of topics are performed in the main thread. This is the main difference between the RxROS2 test program and the plain ROS2 program. The RxROS2 program uses one more thread than the plain ROS2 program to separate the publishing and subscription of topics.
+The thread will however terminate very fast as the observable `from_topic` and `interval` are non-blocking. In fact, the `interval` observable is actually executing in a dedicated thread (scheduler), which means that topics will be published in a dedicated thread whereas the spinner, subscription and processing of topics are performed in the main thread. This is the main difference between the RxROS2 test program and the plain ROS2 program. The RxROS2 program uses one more thread than the plain ROS2 program to separate the publishing and subscription of topics.
