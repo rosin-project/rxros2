@@ -393,3 +393,162 @@ def main(args=None):
     publisher.destroy_node()
     rclpy.shutdown()
 ```
+
+## Performance Measurements
+
+In this section we will take a closer look at the performance of RxROS2. The test will compare a minimal subscriber/publisher program written in RxROS2 and plain ROS2. The test consists of two nodes that publish data and subscribe to data from the other node. The data contains a timestamp that will be updated at the moment the data is published and the latency will be calculated at the moment the other node receives the data. Besides the latency, CPU load, Memory consumption and number of used treads will be measured. Several tests will be performed with various amounts of data.
+
+### Test setup
+The tests will be performed on a RaspberryPi 4B with 4 Mbytes of RAM. The following software has been installed on the machine:
+
+* Ubuntu 18.04.4 server image.
+* ROS2 Eloquent Elusor (desktop version)
+* RxPy v3.0.1
+* Latest version of RxROS2
+
+The software has been installed as is. There has been no changes to RaspberryPi 4B to boost performance, nor has there been installed a special software to boost or optimize performance. The Ubuntu 18.04.4 and ROS2 packages has been updated via the Ubuntu package storage to the latest version.
+
+### Test programs
+To measure CPU load and RAM consumption the Linux `top` command has been used. To measure the number of used threads the `/proc/<pid>/status` file has been used and to measure latency the following programs has been used. The first is a plain ROS2 program and the other is a similar program written in RxROS2:
+
+```python
+import rclpy
+from rclpy.node import Node
+from builtin_interfaces.msg import Time
+from rclpy.clock import Clock
+from ros2_msg.msg import Test
+
+
+def age_of(time: Time):
+    curr_time_nano = Clock().now().to_msg().nanosec
+    time_nano = time.nanosec
+    return curr_time_nano-time_nano
+
+
+def mk_test_msg(msg_no: int, data: str) -> Test:
+    msg = Test()
+    msg.msg_no = msg_no
+    msg.data = data
+    msg.time_stamp = Clock().now().to_msg()
+    return msg
+
+
+class T1(Node):
+    def __init__(self):
+        super().__init__('T1')
+        self.subscription = self.create_subscription(Test, '/T2T', self.subscription_callback, 10)
+        self.publisher = self.create_publisher(Test, '/T1T', 10)
+        self.timer = self.create_timer(0.05, self.timer_callback)
+        self.msg_no = 0
+        self.bulb_data = ''.rjust(1048576, '#')
+        self.get_logger().info('Starting PyNode T1:')
+
+    def subscription_callback(self, msg: Test):
+        self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp)))
+
+    def timer_callback(self):
+        msg = mk_test_msg(self.msg_no, self.bulb_data)
+        self.publisher.publish(msg)
+        self.msg_no += 1
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    t1 = T1()
+    rclpy.spin(t1)
+    t1.destroy_node()
+    rclpy.shutdown()
+```
+
+And the equivalent program written in RxROS2:
+
+```python
+import rclpy
+from rxros2_pytest2 import rxros2
+from rclpy.time import Time
+from rclpy.clock import Clock
+from ros2_msg.msg import Test
+
+
+def age_of(time: Time):
+    curr_time_nano = Clock().now().to_msg().nanosec
+    time_nano = time.nanosec
+    return curr_time_nano-time_nano
+
+
+def mk_test_msg(msg_no: int, data: str) -> Test:
+    msg = Test()
+    msg.msg_no = msg_no
+    msg.data = data
+    msg.time_stamp = Clock().now().to_msg()
+    return msg
+
+
+class T2(rxros2.Node):
+    def __init__(self):
+        super().__init__("T2")
+        self.bulb_data = ''.rjust(1048576, '#')
+        self.get_logger().info('Starting RxPyNode T2:')
+
+    def run(self):
+        rxros2.from_topic(self, Test, "/T1T").subscribe(
+            lambda msg: self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp))))
+
+        rxros2.interval(0.05).pipe(
+            rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bulb_data)),
+            rxros2.publish_to_topic(self, Test, "/T2T"))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    t2 = T2()
+    t2.start()
+    rclpy.spin(t2)
+    t2.destroy_node()
+    rclpy.shutdown()
+```
+
+### Test results
+The test results for ROS2 and RxROS2 (Python) are shown in the following table:
+
+|Test|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|ros2 100B 40Hz|21.5|25.5|0.9|1.0|6|1.0109|2.3862|1.7495|
+|rxros2 100B 40Hz|18.2|25.8|1.0|1.0|7|1.1116|2.4652|1.7949|
+||||||||||
+|ros2 1K 40Hz|26.8|27.2|0.9|1.0|6|1.4847|3.1425|2.6420|
+|rxros2 1K 40Hz|18.5|25.4|1.0|1.1|7|1.1412|2.4635|1.8490|
+||||||||||
+|ros2 1M 40Hz|66.0|66.3|1.2|1.2|6|13.8930|99.9080|29.3816|
+|rxros2 1M 40Hz|46.4|47.0|1.2|1.2|7|9.1136|30.8635|13.7373|
+||||||||||
+|ros2 16M 4Hz|70.0|72.6|4.3|5.6|6|174.3708|435.1811|259.2220|
+|rxros2 16M 4Hz|42.1|42.1|3.6|4.8|7|122.5203|164.1277|130.5957|
+
+The table shows 8 distinct test. The table is organized in 4 groups that consist of a ROS2 test followed by a similar test performed by a RxROS2 program. Test "ros2 100B 40Hz" means we are running two plain ROS2 programs that each publish 100 Bytes of data and subscribes to the data published by the other node. The data is published with a rate of 20Hz per note, or 40Hz in total for the two nodes.
+
+From the table it looks like RxROS2 is outperforming plain ROS2. The larger data messages we use the more distinct is the performance improvement of RxROS2. This is an unexpected result! The expected result is that ROS2 would slightly outperform a similar RxROS2 program due to the more abstract/high level nature of the RxROS2 operators. So what is causing this outcome? If we look at the plain ROS2 program we see that the spinner, subscriber and publisher is all working in the same thread. The RxROS2 program work in a slightly different manner. During startup of the node the node is actually started up in a new thread by the t2->start() command:
+
+```python
+def main(args=None):
+    rclpy.init(args=args)
+    t2 = T2()
+    t2.start()
+    rclpy.spin(t2)
+    t2.destroy_node()
+    rclpy.shutdown()
+```
+
+This means that the `run` method will be called in a separate thread:
+
+```python
+def run(self):
+    rxros2.from_topic(self, Test, "/T1T").subscribe(
+        lambda msg: self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp))))
+
+    rxros2.interval(0.05).pipe(
+        rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bulb_data)),
+        rxros2.publish_to_topic(self, Test, "/T2T"))
+```
+
+The thread will however terminate very fast as the observable `from_topic` and `interval` are non-blocking. In fact, the `interval` observable is actually executing in a dedicated thread (scheduler), which means that topics will be published in a dedicated thread whereas the spinner, subscription and processing of topics are performed in the main thread. This is the main difference between the RxROS2 test program and the plain ROS2 program. The RxROS2 program uses one more thread than the plain ROS2 program to separate the publishing and subscription of topics.
