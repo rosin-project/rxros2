@@ -33,14 +33,10 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
 
 ## Acknowledgement
+This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-The RxROS2 library depends on and uses the following software:<br>
-
-1. Ubuntu Bionic 18.04<br>
-2. ROS2 Eloquent Elusor<br>
-3. Reactive Python, RxPY v3.0.1<br>
-https://github.com/ReactiveX/RxPY<br>
-Released under the MIT license<br>
+![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
+[https://rosin-project.eu](https://rosin-project.eu)
 
 ## Example Package
 
