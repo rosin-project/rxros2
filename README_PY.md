@@ -212,7 +212,7 @@ One of the primary advantages of stream oriented processing is the fact that we 
 ##### Syntax:
 
 ```python
-def public_to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def publish_to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
 ```
 
 ##### Example:
@@ -353,7 +353,7 @@ class Publisher(rxros2.Node):
             rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
             rxros2.do_action(lambda s: print("Send {0}".format(s.data))),
             rxros2.sample_with_frequency(2.0),
-            rxros2.public_to_topic(self, String, "/chatter"))
+            rxros2.publish_to_topic(self, String, "/chatter"))
 
 
 def main(args=None):
@@ -387,7 +387,7 @@ def main(args=None):
         rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
         rxros2.do_action(lambda s: print("Send2 {0}".format(s.data))),
         rxros2.sample_with_frequency(2.0),
-        rxros2.public_to_topic(publisher, String, "/chatter"))
+        rxros2.publish_to_topic(publisher, String, "/chatter"))
 
     rclpy.spin(publisher)
     publisher.destroy_node()
@@ -512,7 +512,7 @@ def main(args=None):
 The test results for ROS2 and RxROS2 (Python) are shown in the following table:
 
 |Test|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-)|
 |ros2 100B 40Hz|21.5|25.5|0.9|1.0|6|1.0109|2.3862|1.7495|
 |rxros2 100B 40Hz|18.2|25.8|1.0|1.0|7|1.1116|2.4652|1.7949|
 ||||||||||
