@@ -82,7 +82,7 @@ The main function is straight forward: It first initialize rclpy. Then it create
 
 ### Creating a RxROS2 Node using the create_node function
 
-The other other way to create a RxROS2 node is by using the function call `rxros2.create_node`. This is done as follows:
+The other way to create a RxROS2 node is by using the function call `rxros2.create_node`. This is done as follows:
 
 ```python
 import rclpy
@@ -103,7 +103,7 @@ The `rxros2.create_node` takes the node name argument and the created node can b
 
 ## Observables
 
-Observables are asynchronous message streams. They are the fundamental data structure used by RxROS2. As soon as we have the observables RxROS2 and Rxpython will provide us with a number of functions and operators to manipulate the streams.
+Observables are asynchronous message streams. They are the fundamental data structure used by RxROS2. As soon as we have the observables RxROS2 and RxPy will provide us with a number of functions and operators to manipulate the streams.
 
 ### Observable from a Topic
 
@@ -199,7 +199,7 @@ def main(args=None):
 
 ### Operators
 
-One of the primary advantages of stream oriented processing is the fact that we can apply functional programming primitives on them. Rxpython operators are nothing but filters, transformations, aggregations and reductions of the observable message streams we created in the previous section.
+One of the primary advantages of stream oriented processing is the fact that we can apply functional programming primitives on them. RxPy operators are nothing but filters, transformations, aggregations and reductions of the observable message streams we created in the previous section.
 
 #### Publish to Topic
 
@@ -238,7 +238,7 @@ def main(args=None):
 
 The operator `rxros2.sample_with_frequency` will at regular intervals emit the last element or message of the observable message stream it was applied on - that is independent of whether it has changed or not. This means that the observable message stream produced by `rxros2.sample_with_frequency` may contain duplicated messages if the frequency is too high and it may miss messages in case the frequency is too low. This is the preferred way in ROS2 to publish messages on a topic and therefore a needed operation.
 
-The operation operator `rxros2.sample_with_frequency` comes in two variants. One that is executing in the current thread and one that is executing in a specified thread also known as a coordination in Rxpython.
+The operation operator `rxros2.sample_with_frequency` comes in two variants. One that is executing in the current thread and one that is executing in a specified thread also known as a coordination in RxPy.
 
 #### Syntax:
 
@@ -508,7 +508,7 @@ def main(args=None):
 The test results for ROS2 and RxROS2 (Python) are shown in the following table:
 
 |Test|CPU min %|CPU max %|MEM min %|MEM max %|THREADS|LATENCY min ms|LATENCY max ms|LATENCY avg ms|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-)|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |ros2 100B 40Hz|21.5|25.5|0.9|1.0|6|1.0109|2.3862|1.7495|
 |rxros2 100B 40Hz|18.2|25.8|1.0|1.0|7|1.1116|2.4652|1.7949|
 ||||||||||
