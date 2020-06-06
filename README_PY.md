@@ -33,10 +33,14 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
 
 ## Acknowledgement
-This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
-[https://rosin-project.eu](https://rosin-project.eu)
+The RxROS2 library depends on and uses the following software:<br>
+
+1. Ubuntu Bionic 18.04<br>
+2. ROS2 Eloquent Elusor<br>
+3. Reactive Python, RxPY v3.0.1<br>
+https://github.com/ReactiveX/RxPY<br>
+Released under the MIT license<br>
 
 ## Example Package
 
@@ -203,12 +207,12 @@ One of the primary advantages of stream oriented processing is the fact that we 
 
 #### Publish to Topic
 
-`rxros2::operators::publish_to_topic` is a rather special operator. It does not modify the message steam - it is in other words an identity function/operator. It will however take each message from the stream and publish it to a specific topic. This means that it is perfectly possible to continue modifying the message stream after it has been published to a topic.
+`rxros2.publish_to_topic` is a rather special operator. It does not modify the message steam - it is in other words an identity function/operator. It will however take each message from the stream and publish it to a specific topic. This means that it is perfectly possible to continue modifying the message stream after it has been published to a topic.
 
 ##### Syntax:
 
 ```python
-def to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def public_to_topic(node: rclpy.node.Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
 ```
 
 ##### Example:
@@ -349,7 +353,7 @@ class Publisher(rxros2.Node):
             rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
             rxros2.do_action(lambda s: print("Send {0}".format(s.data))),
             rxros2.sample_with_frequency(2.0),
-            rxros2.to_topic(self, String, "/chatter"))
+            rxros2.public_to_topic(self, String, "/chatter"))
 
 
 def main(args=None):
@@ -383,7 +387,7 @@ def main(args=None):
         rxros2.map(lambda i: mk_msg("Hello world " + str(i))),
         rxros2.do_action(lambda s: print("Send2 {0}".format(s.data))),
         rxros2.sample_with_frequency(2.0),
-        rxros2.to_topic(publisher, String, "/chatter"))
+        rxros2.public_to_topic(publisher, String, "/chatter"))
 
     rclpy.spin(publisher)
     publisher.destroy_node()
@@ -436,14 +440,14 @@ class T1(Node):
         self.publisher = self.create_publisher(Test, '/T1T', 10)
         self.timer = self.create_timer(0.05, self.timer_callback)
         self.msg_no = 0
-        self.bulb_data = ''.rjust(1048576, '#')
+        self.bolb_data = ''.rjust(1048576, '#')
         self.get_logger().info('Starting PyNode T1:')
 
     def subscription_callback(self, msg: Test):
         self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp)))
 
     def timer_callback(self):
-        msg = mk_test_msg(self.msg_no, self.bulb_data)
+        msg = mk_test_msg(self.msg_no, self.bolb_data)
         self.publisher.publish(msg)
         self.msg_no += 1
 
@@ -483,7 +487,7 @@ def mk_test_msg(msg_no: int, data: str) -> Test:
 class T2(rxros2.Node):
     def __init__(self):
         super().__init__("T2")
-        self.bulb_data = ''.rjust(1048576, '#')
+        self.bolb_data = ''.rjust(1048576, '#')
         self.get_logger().info('Starting RxPyNode T2:')
 
     def run(self):
@@ -491,7 +495,7 @@ class T2(rxros2.Node):
             lambda msg: self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp))))
 
         rxros2.interval(0.05).pipe(
-            rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bulb_data)),
+            rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bolb_data)),
             rxros2.publish_to_topic(self, Test, "/T2T"))
 
 
@@ -543,7 +547,7 @@ def run(self):
         lambda msg: self.get_logger().info('%d,%d,%d' % (msg.msg_no, len(msg.data), age_of(msg.time_stamp))))
 
     rxros2.interval(0.05).pipe(
-        rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bulb_data)),
+        rxros2.map(lambda msg_no: mk_test_msg(msg_no, self.bolb_data)),
         rxros2.publish_to_topic(self, Test, "/T2T"))
 ```
 
