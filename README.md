@@ -399,7 +399,7 @@ The tests will be performed on a RaspberryPi 4B with 4 Mbytes of RAM. The follow
 
 * Ubuntu 18.04.4 server image.
 * ROS2 Eloquent Elusor (desktop version)
-* RxPy v3.0.1
+* RxPy v3.1.0
 * Latest version of RxROS2
 
 The software has been installed as is. There has been no changes to RaspberryPi 4B to boost performance, nor has there been installed a special software to boost or optimize performance. The Ubuntu 18.04.4 and ROS2 packages has been updated via the Ubuntu package storage to the latest version.
