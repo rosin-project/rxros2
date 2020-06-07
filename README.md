@@ -240,9 +240,9 @@ def main(args=None):
 
 #### Send Request
 
-Besides the publish/subscribe model, ROS also provides a request/reply model that allows a remote procedure call (RPC) to be send from one node (request) and handled by another node (reply) - it is a typical client-server mechanism that can be useful in distributed systems.
+Besides the publish/subscribe model, ROS2 also provides a request/reply model that allows a remote procedure call (RPC) to be send from one node (request) and handled by another node (reply) - it is a typical client/server mechanism that can be useful in distributed systems.
 
-RxROS only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS. To send a request the rxros2.send_request operator is called. It take a service name as argument and service type that specifies the type of the observable message stream the operation was applied on. The service type consists of a request and response part. The request part must be filled out prior to the service call and the result will be a new observable stream where the response part has been filled out by the server part.
+RxROS2 only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS2. To send a request the rxros2.send_request operator is called. It take a node, a service type and a service name as argument. The service type consists of a request and response part. The request part must be filled out prior to the service call and the result part will be a new observable stream that is returned by the send_request operator.
 
 ##### Syntax:
 
