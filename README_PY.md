@@ -31,6 +31,10 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
          * [Example:](#example-5)
    * [Example 1: A Topic Listener](#example-1-a-topic-listener)
    * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
+   * [Performance Measurements](#performance-measurements)
+      * [Test setup](#test-setup)
+      * [Test programs](#test-programs)
+      * [Test results](#test-results)
 
 ## Acknowledgement
 This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
@@ -233,6 +237,80 @@ def main(args=None):
     joystick_publisher.destroy_node()
     rclpy.shutdown()
 ```
+
+#### Send Request
+
+Besides the publish/subscribe model, ROS also provides a request/reply model that allows a remote procedure call (RPC) to be send from one node (request) and handled by another node (reply) - it is a typical client-server mechanism that can be useful in distributed systems.
+
+RxROS only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS. To send a request the rxros2.send_request operator is called. It take a service name as argument and service type that specifies the type of the observable message stream the operation was applied on. The service type consists of a request and response part. The request part must be filled out prior to the service call and the result will be a new observable stream where the response part has been filled out by the server part.
+
+##### Syntax:
+
+```python
+def send_request(node: rclpy.node.Node, service_type: Any, service_name: str) -> Callable[[Observable], Observable]:
+```
+
+##### Example: Service Client
+
+```python
+import rxros2
+import rclpy
+from example_interfaces.srv import AddTwoInts
+
+
+def mk_request(a, b) -> AddTwoInts.Request:
+    req = AddTwoInts.Request()
+    req.a = a
+    req.b = b
+    return req
+
+
+class ServiceClient(rxros2.Node):
+    def __init__(self):
+        super().__init__('service_client')
+
+    def run(self):
+        obs = rxros2.range(1, 10).pipe(
+            rxros2.map(lambda i: mk_request(i, i+1)),
+            rxros2.send_request(self, AddTwoInts, "add_two_ints"))
+        obs.subscribe(on_next=lambda response: print("Response {0}".format(response.sum)))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    service_client = ServiceClient()
+    service_client.run()
+    rclpy.spin(service_client)
+    service_client.destroy_node()
+    rclpy.shutdown()
+```
+
+##### Example: Service Server (plain ROS2 code)
+
+```python
+import rclpy
+from rclpy.node import Node
+from example_interfaces.srv import AddTwoInts
+
+
+class ServiceServer(Node):
+    def __init__(self):
+        super().__init__('service_server')
+        self.srv = self.create_service(AddTwoInts, 'add_two_ints', self.add_two_ints_callback)
+
+    def add_two_ints_callback(self, request, response):
+        response.sum = request.a + request.b
+        self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+        return response
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    service_server = ServiceServer()
+    rclpy.spin(service_server)
+    rclpy.shutdown()
+```
+
 
 ### Sample with Frequency
 
