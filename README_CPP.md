@@ -34,7 +34,11 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
             * [Example:](#example-5)
       * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
       * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
-
+      * [Performance Measurements](#performance-measurements)
+         * [Test setup](#test-setup)
+         * [Test programs](#test-programs)
+         * [Test results](#test-results)
+         
 ## Acknowledgement
 This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
