@@ -136,7 +136,7 @@ class VelocityPublisher(rxros2.Node):
             rxros2.map(lambda joy: return joy.event))
         key_obsrv = rxros2.from_topic(self, teleop_msgs.Keyboard, "/keyboard").pipe(
             rxros2.map(lambda key: return key.event))
-        teleop_obsrv = joyObsrv.pipe(merge(key_obsrv))
+        teleop_obsrv = rxros2.merge(joy_Obsrv, key_obsrv)
         # ...
 
 def main(args=None):
@@ -162,7 +162,7 @@ def main(args=None):
         rxros2.map(lambda joy: return joy.event))
     key_obsrv = rxros2.from_topic(velocity_publisher, teleop_msgs.Keyboard, "/keyboard").pipe(
         rxros2.map(lambda key: return key.event))
-    teleop_obsrv = joyObsrv.pipe(rxros2.merge(key_obsrv))
+    teleop_obsrv = rxros2.merge(joy_obsrv, key_obsrv)
     #...
 
     rclpy.spin(velocity_publisher)

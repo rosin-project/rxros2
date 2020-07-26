@@ -38,7 +38,7 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
          * [Test setup](#test-setup)
          * [Test programs](#test-programs)
          * [Test results](#test-results)
-         
+
 ## Acknowledgement
 This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 Common for all RxROS2 programs is that they include the `rxros/rxros2.h` header file. It contains all the necessary code, including observables and operators, to get started using reactive programming (RxCpp) with ROS2.
 
 
-MyNode is defined as `struct` rather than a `class` to take advantage of that all properties and member functions are public. MyNode is further defined as a  `rxros2::Node`. The `rxros2::Node` is a very simple class. It is a sub-class of `rclcpp::Node` and therefore also a ROS2 node. The constructor of the `rxros2::Node` takes the name of the node as argument. In this case "my_node". The `rxros2::Node` is an abstract class with one abstract method named `run` that must be implemented by the sub-class, i.e. MyNode in this case. `rxros2::Node` contains further a function `start`. It will execute the `run` function in a new thread.
+MyNode is defined as `struct` rather than a `class` to take advantage of that all properties and member functions are public. MyNode is further defined as a  `rxros2::Node`. The `rxros2::Node` is a very simple class. It is a sub-class of `rclcpp::Node` and therefore also a ROS2 node. The constructor of the `rxros2::Node` takes the name of the node as argument. In this case "my_node". The `rxros2::Node` has a virtual method named `run` that must be implemented by the sub-class, i.e. MyNode in this case. `rxros2::Node` contains further a function `start`. It will execute the `run` function in a new thread.
 
 The main function is straight forward: It first initialize rclcpp. Then it creates an instance of MyNode and executes the `start` function. The `start` function will execute the `run` function of MyNode in a new thread. It is possible to call `run` directly from the main function simply by executing `my_node->run()`. But be sure in this case that the `run` function is not blocking or else the `rclcpp::spin` function is not called. `rclcpp::spin` is needed in order to publish and listen to ROS2 topics. `rclcpp::shutdown` is finally called to terminate the node in case the `rclcpp::spin` function has been terminated.
 
@@ -126,17 +126,17 @@ Observables are asynchronous message streams. They are the fundamental data stru
 
 ### Observable from a Topic
 
-An observable data stream is created from a topic simply by calling the `rxros2::observable::from_topic` function. The function takes three arguments, a node, the name of the topic and an optional queue size. In order to use the `rxros2::observable::from_topic` function it is important also to specify the type of the topic messages.
+An observable data stream is created from a topic by calling the `rxros2::observable::from_topic` function. The function takes three arguments, a node, the name of the topic and an optional quality of service for the ROS2 topic. In order to use the `rxros2::observable::from_topic` function it is important also to specify the type of the topic messages.
 
-The example below demonstrates how two ROS2 topics named “/joystick” and “/keyboard” are turned into two observable streams by means of the `rxros2::observable::from_topic` function and then merged together into a new observable message stream named `teleop_obsrv`. Observe the use of the map operator: Since `teleop_msgs::Joystick` and `teleop_msgs::Keyboard` are different message types it is not possible to merge them directly. The map operator solves this problem by converting each `teleop_msgs::Joystick` and `teleop_msgs::Keyboard` message into a simple integer that represents the low level event of moving the joystick or pressing the keyboard.
+The example below demonstrates how two ROS2 topics named “/joystick” and “/keyboard” are turned into two observable streams by means of the `rxros2::observable::from_topic` function and then merged together into a new observable message stream named `teleop_obsrv`. Observe the use of the map operator: Since `teleop_msgs::msg::Joystick` and `teleop_msgs::msg::Keyboard` are different message types it is not possible to merge them directly. The map operator solves this problem by converting each `teleop_msgs::::msg:Joystick` and `teleop_msgs::msg::Keyboard` message into a simple integer that represents the low level event of moving the joystick or pressing the keyboard.
 
 The pipe operator “|” is a specialty of RxCpp that is used as a simple mechanism to compose operations on observable message streams. The usual “.” notation could have been used just as well, but it’s common to use the pipe operator “|” in RxCpp.
 
 #### Syntax
 
 ```cpp
-auto rxros2::observable::from_topic<topic_type>(rclcpp::Node* node, const std::string& topic_name, const uint32_t queue_size = 10);
-auto rxros2::observable::from_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
+auto rxros2::observable::from_topic<topic_type>(rxros2::Node* node, const std::string& topic_name, const rclcpp::QoS& qos = 10);
+auto rxros2::observable::from_topic<topic_type>(std::shared_ptr<rxros2::Node> node, const std::string& topic_name, const rclcpp::QoS& qos = 10);
 ```
 
 #### Example
@@ -146,10 +146,10 @@ struct VelocityPublisher: public rxros2::Node {
     MyNode(): rxros2::Node("velocity_publisher") {}
 
     void run() {
-      auto joy_obsrv = rxros2::observable::from_topic<teleop_msgs::Joystick>(this, "/joystick")
-          | map([](teleop_msgs::Joystick joy) { return joy.event; });
-      auto key_obsrv = rxros2::observable::from_topic<teleop_msgs::Keyboard>(this, "/keyboard")
-          | map([](teleop_msgs::Keyboard key) { return key.event; });
+      auto joy_obsrv = rxros2::observable::from_topic<teleop_msgs::msg::Joystick>(this, "/joystick")
+          | map([](teleop_msgs::msg::Joystick joy) { return joy.event; });
+      auto key_obsrv = rxros2::observable::from_topic<teleop_msgs::msg::Keyboard>(this, "/keyboard")
+          | map([](teleop_msgs::msg::Keyboard key) { return key.event; });
       auto teleop_obsrv = joyObsrv.merge(keyObsrv);
       //...
     }
@@ -173,9 +173,9 @@ int main(int argc, char **argv) {
     auto velocity_publisher = rxros2::create_node("velocity_publisher");
 
     auto joy_obsrv = rxros2::observable::from_topic<teleop_msgs::Joystick>(velocity_publisher, "/joystick")
-        | map([](teleop_msgs::Joystick joy) { return joy.event; });
+        | map([](teleop_msgs::msg::Joystick joy) { return joy.event; });
     auto key_obsrv = rxros2::observable::from_topic<teleop_msgs::Keyboard>(velocity_publisher, "/keyboard")
-        | map([](teleop_msgs::Keyboard key) { return key.event; });
+        | map([](teleop_msgs::msg::Keyboard key) { return key.event; });
     auto teleop_obsrv = joyObsrv.merge(keyObsrv);
     //...
 
@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
     //...
     rxros2::observable::from_device<joystick_event>("/dev/input/js0")
         | map(joystickEvent2JoystickMsg)
-        | publish_to_topic<teleop_msgs::Joystick>(joystick_publisher, "/joystick");
+        | publish_to_topic<teleop_msgs::msg::Joystick>(joystick_publisher, "/joystick");
     //...
     rclcpp::spin(velocity_publisher);
     rclcpp::shutdown();
@@ -225,8 +225,8 @@ One of the primary advantages of stream oriented processing is the fact that we 
 ##### Syntax:
 
 ```cpp
-auto rxros2::operators::publish_to_topic<topic_type>(rclcpp::Node* node, const std::string& topic_name, const uint32_t queue_size = 10);
-auto rxros2::operators::publish_to_topic<topic_type>(std::shared_ptr<rclcpp::Node> node, const std::string& topic_name, const uint32_t queue_size = 10);
+auto rxros2::operators::publish_to_topic<topic_type>(rxros2::Node* node, const std::string& topic_name, const rclcpp::QoS& qos = 10);
+auto rxros2::operators::publish_to_topic<topic_type>(std::shared_ptr<rxros2::Node> node, const std::string& topic_name, const rclcpp::QoS& qos = 10);
 ```
 
 ##### Example:
@@ -238,7 +238,7 @@ struct JoystickPublisher: public rxros2::Node {
     void run() {
       rxros2::observable::from_device<joystick_event>("/dev/input/js0")
           | map(joystickEvent2JoystickMsg)
-          | publish_to_topic<teleop_msgs::Joystick>(joystick_publisher, "/joystick");
+          | publish_to_topic<teleop_msgs::msg::Joystick>(joystick_publisher, "/joystick");
     }
 };
 
@@ -252,16 +252,17 @@ int main(int argc, char **argv) {
 }
 ```
 
-### Call Service
+### Send request
 
-Besides the publish/subscribe model, ROS2 also provides a request/reply model that allows a to be send from one node (request) and handled by another node (reply) - it is a typical client-server mechanism that can be useful in distributed systems.
+Besides the publish/subscribe model, ROS2 also provides a request/reply model that allows a message to be send from one node (request) and handled by another node (reply) - it is a typical client-server mechanism that can be useful in distributed systems.
 
-RxROS2 only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS2. To send a request the `rxros2::operators::call_service` operator is called. It take a service name as argument and service type that specifies the type of the observable message stream the operation was applied on. The service type consists of a request and response part. The request part must be filled out prior to the service call and the result will be a new observable stream where the response part has been filled out by the server part.
+RxROS2 only provides a means to send a request, i.e. the client side. The server side will have to be created exactly the same way as it is done it ROS2. To send a request the `rxros2::operators::send_request` operator is called. It take a node and a service name as argument and a service type that specifies the type of the observable message stream the operation is applied on. The service type consists of a request and response part. The request part must be filled out prior to the send request call and the result will be a new observable stream where the response part has been filled out by the server part.
 
 #### Syntax:
 
 ```cpp
-auto rxros2::operators::call_service<service_type>(const std::string& service_name);
+auto send_request<service_type>(rxros2::Node* node, const std::string& service_name)
+auto send_request<service_type>(std::shared_ptr<rxros2::Node> node, const std::string& service_name)
 ```
 
 ### Sample with Frequency
@@ -285,7 +286,7 @@ int main(int argc, char **argv) {
     auto joystick_publisher = rxros2::create_node("joystick_publisher");
     //...
     | sample_with_frequency(frequencyInHz)
-    | publish_to_topic<geometry_msgs::Twist>(joystick_publisher, "/cmd_vel");
+    | publish_to_topic<geometry_msgs::msg::Twist>(joystick_publisher, "/cmd_vel");
     //...
     rclcpp::spin(joystick_publisher);
     rclcpp::shutdown();
@@ -335,7 +336,7 @@ int main(int argc, char** argv)
 
     rxros2::observable::from_device<input_event>(keyboardDevice)
         | map(keyboardEvent2KeyboardMsg)
-        | publish_to_topic<teleop_msgs::Keyboard>(keyboard_publisher, "/keyboard");
+        | publish_to_topic<teleop_msgs::msg::Keyboard>(keyboard_publisher, "/keyboard");
 
     rclcpp::spin(keyboard_publisher);
     rclcpp::shutdown();
@@ -417,15 +418,15 @@ int main(int argc, char** argv) {
         vel.angular.z = std::get<1>(velTuple);
         return vel;};
 
-    auto joyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Joystick>(velocity_publisher, "/joystick") // create an Observable stream from "/joystick" topic
+    auto joyObsrv = rxros2::Observable::fromTopic<teleop_msgs::msg::Joystick>(velocity_publisher, "/joystick") // create an Observable stream from "/joystick" topic
         | map([](teleop_msgs::Joystick joy) { return joy.event; });
-    auto keyObsrv = rxros2::Observable::fromTopic<teleop_msgs::Keyboard>(velocity_publisher, "/keyboard") // create an Observable stream from "/keyboard" topic
+    auto keyObsrv = rxros2::Observable::fromTopic<teleop_msgs::msg::Keyboard>(velocity_publisher, "/keyboard") // create an Observable stream from "/keyboard" topic
         | map([](teleop_msgs::Keyboard key) { return key.event; });
-    joyObsrv.merge(keyObsrv)                                                      // merge the joystick and keyboard messages into an Observable teleop stream.
-        | scan(std::make_tuple(0.0, 0.0), teleop2VelTuple)                        // turn the teleop stream into a linear and angular velocity stream.
-        | map(velTuple2TwistMsg)                                                  // turn the linear and angular velocity stream into a Twist stream.
-        | sample_with_frequency(frequencyInHz)                                    // take latest Twist msg and populate it with the specified frequency.
-        | publish_to_topic<geometry_msgs::Twist>(velocity_publisher, "/cmd_vel"); // publish the Twist messages to the topic "/cmd_vel"
+    joyObsrv.merge(keyObsrv)                                                           // merge the joystick and keyboard messages into an Observable teleop stream.
+        | scan(std::make_tuple(0.0, 0.0), teleop2VelTuple)                             // turn the teleop stream into a linear and angular velocity stream.
+        | map(velTuple2TwistMsg)                                                       // turn the linear and angular velocity stream into a Twist stream.
+        | sample_with_frequency(frequencyInHz)                                         // take latest Twist msg and populate it with the specified frequency.
+        | publish_to_topic<geometry_msgs::msg::Twist>(velocity_publisher, "/cmd_vel"); // publish the Twist messages to the topic "/cmd_vel"
 
     RCLCPP_INFO(velocity_publisher->get_logger(), "Spinning velocity_publisher ...");
     rclcpp::spin(velocity_publisher);

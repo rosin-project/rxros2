@@ -68,18 +68,18 @@ def create_node(node_name: str) -> ROS2Node:
     return rclpy.create_node(node_name)
 
 
-def from_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Observable:
+def from_topic(node: ROS2Node, topic_type: Any, topic_name: str, qos=10) -> Observable:
     """
     The from_topic function creates an observable data stream from a ROS2 topic.
 
     :param node: An instance of a Node.
     :param topic_type: The type of the topic and also the type of the observable data elements.
     :param topic_name: The name of the topic.
-    :param queue_size: The size of the queue associated to the topic.
+    :param qos: The quality of service associated to the ROS2 topic.
     :return An observable data stream from a specified topic.
     """
     def _subscribe(observer, scheduler=None) -> Disposable:
-        node.create_subscription(topic_type, topic_name, lambda msg: observer.on_next(msg), queue_size)
+        node.create_subscription(topic_type, topic_name, lambda msg: observer.on_next(msg), qos)
         return observer
     return create(_subscribe)
 
@@ -110,18 +110,18 @@ def from_device(device_name: str, struct_format: str) -> Observable:
     return create(_subscribe)
 
 
-def publish_to_topic(node: ROS2Node, topic_type: Any, topic_name: str, queue_size=10) -> Callable[[Observable], Observable]:
+def publish_to_topic(node: ROS2Node, topic_type: Any, topic_name: str, qos=10) -> Callable[[Observable], Observable]:
     """
     The to_topic operator will take each message from the stream and publish it to a specific ROS2 topic.
 
     :param node: An instance of a Node.
     :param topic_type: The type of the observable data elements.
     :param topic_name: The name of the ROS2 topic to publish the messages to.
-    :param queue_size: The size of the queue associated to ROS2 publisher.
+    :param qos: The quality of service associated to ROS2 publisher.
     :return: The observable data stream it operates on, i.e. it is an identity operator.
     """
     def _publish_to_topic(source) -> Observable:
-        publisher = node.create_publisher(topic_type, topic_name, queue_size)
+        publisher = node.create_publisher(topic_type, topic_name, qos)
         source.subscribe(on_next=lambda msg: publisher.publish(msg))
         return source
     return _publish_to_topic
@@ -142,65 +142,13 @@ def send_request(node: ROS2Node, service_type: Any, service_name: str) -> Callab
             client.wait_for_service()
             source.subscribe(on_next=lambda request: observer.on_next(client.call(request)))
             return observer
-
         return create(_subscribe)
     return _send_request
 
 
-# def call_service_async(node: ROS2Node, service_type: Any, service_name: str) -> Callable[[Observable], Observable]:
-#     def _call_service(source) -> Observable:
-#         def _subscribe(observer, scheduler=None) -> Disposable:
-#             def _request2response(request: SrvTypeRequest):
-#                 future = client.call_async(request)
-#                 rclpy.spin_until_future_complete(node, future)
-#                 observer.on_next(future.result())
-#
-#             client = node.create_client(service_type, service_name)
-#             if client.wait_for_service():
-#                 source.subscribe(on_next=lambda request: _request2response(request))
-#             return observer
-#         return create(_subscribe)
-#     return _call_service
-
-
-# def send_goal(node: ROS2Node, action_type: Any, action_name: str) -> Callable[[Observable], Observable]:
-#     def _send_goal(source) -> Observable:
-#         def _subscribe(observer, scheduler=None) -> Disposable:
-#             def _done_callback(future):
-#                 observer.on_next((None, future.result().result))
-#                 event.set()
-#
-#             def _feedback_callback(feedback_msg):
-#                 observer.on_next((feedback_msg.feedback, None))
-#
-#             def _ready_callback(future):
-#                 goal_handle = future.result()
-#                 if goal_handle.accepted:
-#                     get_result_future = goal_handle.get_result_async()
-#                     get_result_future.add_done_callback(_done_callback)
-#                 else:
-#                     observer.on_error("Goal not accepted by action client {0}".format(action_name))
-#                     event.set()
-#
-#             def _send_goal_async(goal):
-#                 event.clear()
-#                 send_goal_future = action_client.send_goal_async(goal, feedback_callback=_feedback_callback)
-#                 send_goal_future.add_done_callback(_ready_callback)
-#                 event.wait()
-#
-#             event = threading.Event()
-#             action_client = ActionClient(node, action_type, action_name)
-#             action_client.wait_for_server()
-#             source.subscribe(on_next=lambda goal: _send_goal_async(goal))
-#
-#             return observer
-#         return create(_subscribe)
-#     return _send_goal
-
-
 def send_goal(node: ROS2Node, action_type: Any, action_name: str) -> Callable[[Observable], Observable]:
     """
-    The send_request operator will send a goal to a action server which returns a result.
+    The send_goal operator will send a goal to a action server which returns a result.
 
     :param node: An instance of a Node.
     :param action_type: The type of action. It consist of a goal, a feedback and a result part.
@@ -213,7 +161,6 @@ def send_goal(node: ROS2Node, action_type: Any, action_name: str) -> Callable[[O
             action_client.wait_for_server()
             source.subscribe(on_next=lambda goal: observer.on_next(action_client.send_goal(goal)))
             return observer
-
         return create(_subscribe)
     return _send_goal
 
