@@ -46,45 +46,72 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace rxros2
 {
-    /// rxros2::Node is a rclcpp::Node that will start the run method in a new thread when instantiated.
+    /// rxros2::Node is a rclcpp::Node that contains the necessary means to create and execute a RxROS2 program.
     /**
-     * rxros2::Node is a rclcpp::Node, but it cannot be instantiated directly because it is abstract class.
-     * Only by creating a Sub-class of rxros2::Node and by implementing the abstract method 'run' can an
-     * instance be created. The 'run' method will be started in a new thread.
+     * rxros2::Node is a rclcpp::Node that contains the necessary means to create and execute a RxROS2 program.
+     * It contains in particular a abstract method 'run' that must be implemented by a subclass of rxros2::Node.
+     * The 'run' method is the rxros2::Node's main function. It should contain the RxROS2 code that is necessary
+     * to implement the node. The 'run' method can be called by the subclass either by calling 'run' directly
+     * from the subclass or it can be called by by the 'start' method provided by the rxros2::Node in which case
+     * it will execute in a dedicated thread.
      */
     class Node: public rclcpp::Node
     {
+    private:
+        std::list<rclcpp::SubscriptionBase::SharedPtr> subscriptions;
+        std::list<rclcpp::PublisherBase::SharedPtr> publishers;
+
     public:
         /// Constructor of a rxros2 Node.
         /**
-         * The constructor of a rxros2::Node. It initialize the super class rxlcpp::Node and
-         * spawns a new thread that executes the run() method. The run method is abstract
-         * and must therefore be implemented by a sub-class of rxros2::Node
+         * The constructor of a rxros2::Node.
+         * It initialize the super class rxlcpp::Node by the specified name of the node.
          *
          * @param node_name The name of the node.
          */
         explicit Node(const std::string& node_name): rclcpp::Node(node_name) {}
         ~Node() = default;
 
-        /// run is an abstract method that should be implemented by a sub-class of rxros2::Node.
+        /// run is a abstract method that should be implemented by a sub-class of rxros2::Node.
         virtual void run() = 0;
 
+        /// start calls the abstract run method in a dedicated thread.
         void start() {
             std::thread trd([this]() { this->run(); });
             trd.detach();
         }
+
+        template<typename T,typename CBT>
+        typename rclcpp::Subscription<T>::SharedPtr add_subscription(const std::string& topic_name, const rclcpp::QoS& qos, CBT&& callback) {
+            auto subscription = create_subscription<T>(topic_name, qos, callback);
+            subscriptions.push_back(subscription);
+            return subscription;
+        }
+
+        template<typename T>
+        typename rclcpp::Publisher<T>::SharedPtr add_publisher(const std::string& topic_name, const rclcpp::QoS& qos) {
+            auto publisher = create_publisher<T>(topic_name, qos);
+            publishers.push_back(publisher);
+            return publisher;
+        }
     }; // end of class Node
 
-    /// create_node is a simple wrapper function that will create a shared_ptr instance of the rclcpp::Node
+    /// create_node is a simple wrapper function that will create a shared_ptr instance of the rxros2::Node
     /**
-     * create_node is a simple wrapper function that will create a shared_ptr instance of the rclcpp::Node.
-     * The idea is to allow simple creation of a rxros2 program that are not
+     * create_node is a simple wrapper function that will create a shared_ptr instance of the rxros2:Node.
+     * The idea is to allow a simple creation of a rxros2 node without having first to create a dedicated
+     * subclass of rxros2::Node
      *
      * @param node_name The name of the node.
-     * @return shared_ptr instance of a rclcpp::Node
+     * @return shared_ptr instance of a rxros2::Node
      */
-    std::shared_ptr<rclcpp::Node> create_node(const std::string& node_name) {
-        return std::make_shared<rclcpp::Node>(node_name);
+    std::shared_ptr<Node> create_node(const std::string& node_name) {
+        struct MinimalNode: public Node
+        {
+            explicit MinimalNode(const std::string& node_name): Node(node_name) {}
+            void run() {exit(-1);}
+        }; // end of class MinimalNode
+        return std::make_shared<MinimalNode>(node_name);
     }
 
     /// rxros2::Exception is a helper class to simplify the creation of exceptions.
@@ -115,45 +142,42 @@ namespace rxros2
     {
         /// from_topic creates an observable data stream from a ROS2 topic.
         /**
-         * An observable data stream is created from a topic by calling the from_topic function.
+         * from_topic creates an observable data stream from a ROS2 topic.
          * The function takes two arguments a name of the topic and a queue size.
          * In order to use the from_topic function it is important also to specify
          * the type of the topic messages.
          *
          * @tparam T Type of topic and also the type of the elements in the returned observable.
-         * @param node A pointer to a rclcpp::Node.
+         * @param node A pointer to a Node.
          * @param topic The name of the topic.
-         * @param queue_size The size of the queue associated to the topic.
+         * @param qos The quality of service for the ROS2 subscription.
          * @return An observable data stream from the specified topic.
          */
         template<class T>
-        static auto from_topic(rclcpp::Node* node, const std::string& topic, const uint32_t queue_size = 10) {
-            static typename rclcpp::Subscription<T>::SharedPtr subscription;
+        static auto from_topic(Node* node, const std::string& topic_name, const rclcpp::QoS& qos = 10) {
             auto observable = rxcpp::observable<>::create<std::shared_ptr<T>> (
                 [=](rxcpp::subscriber<std::shared_ptr<T>> subscriber) {
-                    auto callback = [=](const std::shared_ptr<T> val) {
-                        subscriber.on_next(val);};
-                    subscription = node->create_subscription<T>(topic, queue_size, callback);
+                    node->add_subscription<T>(topic_name, qos, [=](const std::shared_ptr<T> val) {subscriber.on_next(val);});
                 });
             return observable;
         }
 
         /// from_topic creates an observable data stream from a ROS2 topic.
         /**
-         * An observable data stream is created from a topic by calling the from_topic function.
+         * from_topic creates an observable data stream from a ROS2 topic.
          * The function takes two arguments a name of the topic and a queue size.
          * In order to use the from_topic function it is important also to specify
          * the type of the topic messages.
          *
          * @tparam T Type of topic and also the type of the elements in the returned observable.
-         * @param node A shared_ptr to a rclcpp::Node.
+         * @param node A shared_ptr to a Node.
          * @param topic The name of the topic.
-         * @param queue_size The size of the queue associated to the topic.
+         * @param qos The quality of service for the ROS2 subscription.
          * @return An observable data stream from the specified topic.
          */
         template<class T>
-        static auto from_topic(const std::shared_ptr<rclcpp::Node>& node, const std::string& topic, const uint32_t queue_size = 10) {
-            return from_topic<T>(node.get(), topic, queue_size);
+        static auto from_topic(const std::shared_ptr<Node>& node, const std::string& topic_name, const rclcpp::QoS& qos = 10) {
+            return from_topic<T>(node.get(), topic_name, qos);
         }
 
 
@@ -221,15 +245,15 @@ namespace rxros2
 
     /**
      * One of the primary advantages of stream oriented processing is that we can apply
-     * functional programming primitives on them. RxCpp operators are nothing but filters,
-     * transformations, aggregations and reductions of the observable message streams
-     * we created above.
+     * functional programming primitives on them also known a operators in reactive programming.
+     * RxCpp operators are nothing but filters, transformations, aggregations and reductions of
+     * the observable message streams we created above.
      */
     namespace operators
     {
         /// sample_with_frequency will at regular intervals emit the last element of the observable message stream it was applied on.
         /**
-         * The operator sample_with_frequency will at regular intervals emit the last element or message
+         * sample_with_frequency will at regular intervals emit the last element or message
          * of the observable message stream it was applied on - that is independent of whether it has
          * changed or not. This means that the observable message stream produced by sample_with_frequency
          * may contain duplicated messages if the frequency is too high and it may miss messages in case
@@ -250,7 +274,7 @@ namespace rxros2
 
         /// sample_with_frequency will at regular intervals emit the last element of the observable message stream it was applied on.
         /**
-         * The operator sample_with_frequency will at regular intervals emit the last element or message
+         * sample_with_frequency will at regular intervals emit the last element or message
          * of the observable message stream it was applied on - that is independent of whether it has
          * changed or not. This means that the observable message stream produced by sample_with_frequency
          * may contain duplicated messages if the frequency is too high and it may miss messages in case
@@ -270,59 +294,58 @@ namespace rxros2
 
         /// publish_to_topic will publish each element of an observable data stream to a ROS2 topic.
         /**
-         * The publish_to_topic is a special operator as it does not modify the message steam it operates on.
-         * However, it will take each message from the stream and publish it to a specific ROS2 topic.
+         * publish_to_topic will publish each element of an observable data stream to a ROS2 topic.
+         * It is a special operator as it does not modify the message steam it operates on.
          *
          * @tparam T Type of the elements in the observable message stream and the type of the published ROS2 messages.
-         * @param node A pointer to a rclcpp::Node.
+         * @param node A pointer to a Node.
          * @param topic The name of the ROS2 topic to publish the messages to.
-         * @param queue_size The size of the queue associated to ROS2 publisher.
+         * @param qos The quality of service for the ROS2 publisher.
          * @return The observable data stream it operates on, i.e. it is an identity operator.
          */
         template<class T>
-        static auto publish_to_topic(rclcpp::Node* node, const std::string &topic, const uint32_t queue_size = 10) {
+        static auto publish_to_topic(Node* node, const std::string &topic_name, const rclcpp::QoS& qos = 10) {
             return [=](auto&& source) {
-                auto publisher = node->create_publisher<T>(topic, queue_size);
-                source.subscribe ([=](const T& msg) {publisher->publish(msg);});
+                auto publisher = node->add_publisher<T>(topic_name, qos);
+                source.subscribe([=](const T& msg) {publisher->publish(msg);});
                 return source;};
         }
 
         /// publish_to_topic will publish each element of an observable data stream to a ROS2 topic.
         /**
-         * The publish_to_topic is a special operator as it does not modify the message steam it operates on.
-         * However, it will take each message from the stream and publish it to a specific ROS2 topic.
+         * publish_to_topic will publish each element of an observable data stream to a ROS2 topic.
+         * It is a special operator as it does not modify the message steam it operates on.
          *
          * @tparam T Type of the elements in the observable message stream and the type of the published ROS2 messages.
-         * @param node A shared_ptr to a rclcpp::Node.
+         * @param node A shared_ptr to a Node.
          * @param topic The name of the ROS2 topic to publish the messages to.
-         * @param queue_size The size of the queue associated to ROS2 publisher.
+         * @param qos quality of service for the ROS2 publisher.
          * @return The observable data stream it operates on, i.e. it is an identity operator.
          */
         template<class T>
-        static auto publish_to_topic(const std::shared_ptr<rclcpp::Node>& node, const std::string &topic, const uint32_t queue_size = 10) {
-            return publish_to_topic<T>(node.get(), topic, queue_size);
+        static auto publish_to_topic(const std::shared_ptr<Node>& node, const std::string &topic_name, const rclcpp::QoS& qos = 10) {
+            return publish_to_topic<T>(node.get(), topic_name, qos);
         }
 
 
-        /// send_request will send a request to a server node and return the responce as an observable data stream.
+        /// send_request will send a request to a server node and return the response as a new observable data stream.
         /**
          * ROS2 provides a request/response model that allows messages to be send from one node (request)
          * and handled by another node (response). It is a typical client-server mechanism that can be
-         * useful in distributed systems. RxROS2 only provides a means to send a request, i.e.
-         * the client side. The server side will have to be created exactly the same way as it is done
-         * it ROS2. To send a request the send_request operator is called. It take a node and a
-         * service name as argument and a type that contains both the request and response part.
-         * The observable data stream send_request operates on is the request part of the specified type
-         * and it return a new observable data stream where the elements are the response part of the
-         * specified type: observable<T::Request> -> send_request("service_name") -> observable<T::Response>
+         * useful in distributed systems. RxROS2 provides a means to send a request, i.e. the client side.
+         * To send a request the send_request operator is called. It take a node and a service name as argument
+         * and a type that contains both the request and response part. The observable data stream send_request
+         * operates on is the request part of the specified type and it return a new observable data stream where
+         * the elements are the response part of the specified type:
+         * observable<T::Request> -> send_request("service_name") -> observable<T::Response>
          *
          * @tparam T A type consisting of a request and response part.
-         * @param node A pointer to a rclcpp::Node.
+         * @param node A pointer to a Node.
          * @param service_name The name of the service to be used for calculating the response.
          * @return a new observable message stream consisting of the responses from the services.
          */
         template<class T>
-        static auto send_request(rclcpp::Node* node, const std::string& service_name) {
+        static auto send_request(Node* node, const std::string& service_name) {
             return [=](auto&& source) {
                 return rxcpp::observable<>::create<std::shared_ptr<typename T::Response>>(
                     [=](rxcpp::subscriber<std::shared_ptr<typename T::Response>> subscriber) {
@@ -335,80 +358,43 @@ namespace rxros2
                                 subscriber.on_next(future.get());});});};
         }
 
-        /// send_request will send a request to a server node and return the responce as an observable data stream.
+        /// send_request will send a request to a server node and return the response as a new observable data stream.
         /**
-        * ROS2 provides a request/response model that allows messages to be send from one node (request)
-        * and handled by another node (response). It is a typical client-server mechanism that can be
-        * useful in distributed systems. RxROS2 only provides a means to send a request, i.e.
-        * the client side. The server side will have to be created exactly the same way as it is done
-        * it ROS2. To send a request the send_request operator is called. It take a node and a
-        * service name as argument and a type that contains both the request and response part.
-        * The observable data stream send_request operates on is the request part of the specified type
-        * and it return a new observable data stream where the elements are the response part of the
-        * specified type: observable<T::Request> -> send_request("service_name") -> observable<T::Response>
-        *
-        * @tparam T A type consisting of a request and response part.
-        * @param node A pointer to a rclcpp::Node.
-        * @param service_name The name of the service to be used for calculating the response.
-        * @return a new observable message stream consisting of the responses from the services.
-        */
+         * ROS2 provides a request/response model that allows messages to be send from one node (request)
+         * and handled by another node (response). It is a typical client-server mechanism that can be
+         * useful in distributed systems. RxROS2 provides a means to send a request, i.e. the client side.
+         * To send a request the send_request operator is called. It take a node and a service name as argument
+         * and a type that contains both the request and response part. The observable data stream send_request
+         * operates on is the request part of the specified type and it return a new observable data stream where
+         * the elements are the response part of the specified type:
+         * observable<T::Request> -> send_request("service_name") -> observable<T::Response>
+         *
+         * @tparam T A type consisting of a request and response part.
+         * @param node A shared pointer pointer to a Node.
+         * @param service_name The name of the service to be used for calculating the response.
+         * @return a new observable message stream consisting of the responses from the services.
+         */
         template<class T>
-        static auto send_request(const std::shared_ptr<rclcpp::Node>& node, const std::string& service_name) {
+        static auto send_request(const std::shared_ptr<Node>& node, const std::string& service_name) {
             return send_request<T>(node.get(), service_name);
-            //return send_request<T>(std::shared_ptr<rclcpp::Node>(node), service_name);
         }
 
-
+        /// send_goal will send an goal to an action server and return the result as a new observable data stream.
+        /**
+         * RxROS2 provides a means to send an action (goal) from a action client to an action server that will
+         * return a result. To send a goal the send_goal operator is called. It take a node and a action
+         * name as argument and a type that contains both the goal, feedback and result part of the action.
+         * The observable data stream send_goal operates on is the goal part of the specified type and
+         * it return a new observable data stream where the elements are the result part of the specified type:
+         * observable<T::Goal> -> send_goal("action_name") -> observable<T::Result>
+         *
+         * @tparam T A type consisting of a goal, feedback and result part.
+         * @param node A pointer to a Node.
+         * @param service_name The name of the service to be used for calculating the result.
+         * @return a new observable message stream consisting of the results of the goals.
+         */
         template<class T>
-        static auto send_goal_async(rclcpp::Node* node, const std::string& action_name) {
-            return [=](auto&& source) {
-                return rxcpp::observable<>::create<std::shared_ptr<typename T::Result>>(
-                    [=](rxcpp::subscriber<std::shared_ptr<typename T::Result>> subscriber) {
-                        using ClientGoalHandle = rclcpp_action::ClientGoalHandle<T>;
-                        auto action_client = rclcpp_action::create_client<T>(node->get_node_base_interface(), node->get_node_graph_interface(), node->get_node_logging_interface(), node->get_node_waitables_interface(), action_name);
-                        action_client->wait_for_action_server();
-
-                        auto send_goal_options = rclcpp_action::Client<T>::SendGoalOptions();
-                        send_goal_options.goal_response_callback = [=] (std::shared_future<typename ClientGoalHandle::SharedPtr> future) {
-                            auto goal_handle = future.get();
-                            if (!goal_handle)
-                                RCLCPP_ERROR(node->get_logger(), "Goal was rejected by server!");
-                            else
-                                RCLCPP_INFO(node->get_logger(), "Goal accepted by server.");
-                        };
-                        send_goal_options.feedback_callback = [=] (const typename ClientGoalHandle::SharedPtr& client_goal_handle, const std::shared_ptr<typename T::Feedback> feedback) {
-                            RCLCPP_INFO(node->get_logger(), "Feedback received.");
-                        };
-                        send_goal_options.result_callback = [=] (const typename ClientGoalHandle::WrappedResult& result) {
-                            switch (result.code) {
-                                case rclcpp_action::ResultCode::SUCCEEDED:
-                                    subscriber.on_next(result.result);
-                                    break;
-                                case rclcpp_action::ResultCode::ABORTED:
-                                    RCLCPP_ERROR(node->get_logger(), "Goal was aborted");
-                                    break;
-                                case rclcpp_action::ResultCode::CANCELED:
-                                    RCLCPP_ERROR(node->get_logger(), "Goal was canceled");
-                                    break;
-                                default:
-                                    RCLCPP_ERROR(node->get_logger(), "Unknown result code");
-                                    break;
-                            }
-                        };
-
-                        source.subscribe(
-                            [=](const std::shared_ptr<typename T::Goal> goal) {
-                                action_client->async_send_goal(goal, send_goal_options);});});};
-        }
-
-        template<class T>
-        static auto send_goal_async(const std::shared_ptr<rclcpp::Node>& node, const std::string& action_name) {
-            return send_goal_async<T>(node.get(), action_name);
-        }
-
-        
-        template<class T>
-        static auto send_goal(rclcpp::Node* node, const std::string& action_name) {
+        static auto send_goal(Node* node, const std::string& action_name) {
             return [=](auto&& source) {
                 return rxcpp::observable<>::create<std::shared_ptr<typename T::Result>>(
                     [=](rxcpp::subscriber<std::shared_ptr<typename T::Result>> subscriber) {
@@ -419,8 +405,22 @@ namespace rxros2
                                 subscriber.on_next(action_client->send_goal(goal));});});};
         }
 
+        /// send_goal will send an goal to an action server and return the result as a new observable data stream.
+        /**
+         * RxROS2 provides a means to send an action (goal) from a action client to an action server that will
+         * return a result. To send a goal the send_goal operator is called. It take a node and a action
+         * name as argument and a type that contains both the goal, feedback and result part of the action.
+         * The observable data stream send_goal operates on is the goal part of the specified type and
+         * it return a new observable data stream where the elements are the result part of the specified type:
+         * observable<T::Goal> -> send_goal("action_name") -> observable<T::Result>
+         *
+         * @tparam T A type consisting of a goal, feedback and result part.
+         * @param node A shared pointer to a Node.
+         * @param service_name The name of the service to be used for calculating the result.
+         * @return a new observable message stream consisting of the results of the goals.
+         */
         template<class T>
-        static auto send_goal(const std::shared_ptr<rclcpp::Node>& node, const std::string& action_name) {
+        static auto send_goal(const std::shared_ptr<Node>& node, const std::string& action_name) {
             return send_goal<T>(node.get(), action_name);
         }
     } // end namespace operators
