@@ -12,6 +12,7 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
       * [Dependencies](#dependencies)
       * [Example Package](#example-package)
       * [Setup and Installation](#setup-and-installation)
+      * [Creating a ROS2 Package](#creating-a-rxros2-package)
       * [Creating a RxROS2 Node](#creating-a-rxros2-node)
           * [Creating a RxROS2 Node using a Class](#creating-a-rxros2-node-using-a-class)
           * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -48,18 +49,42 @@ This projects has received funding from the European Union's Horizon 2020 resear
 ## Dependencies
 The RxROS2 library depends on and uses the following software:<br>
 
-1. Ubuntu Bionic 18.04<br>
-2. ROS2 Eloquent Elusor<br>
+1. Ubuntu Bionic Beaver 18.04 and ROS2 Eloquent Elusor<br>
+2. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy<br>
 3. Reactive C++ v2<br>
-https://github.com/ReactiveX/RxCpp<br>
-Released under the Microsoft Open Source Code of Conduct.<br>
-The RxCpp library (header files) is installed as part of installing RxROS2<br>
+
+Please follow the installation instruction of Ubuntu at
+https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
+
+and the installation instructions of ROS2 at
+https://index.ros.org/doc/ros2/Installation/.
 
 ## Example Package
 
 TBD
 
 ## Setup and Installation
+
+The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2. To manually install RxROS2 you must first install a version of RxCpp. This is done as follows:
+
+```bash
+git clone --recursive  https://github.com/ReactiveX/RxCpp.git
+cd RxCpp
+mkdir -p projects/build
+cd projects/build
+cmake -G"Unix Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -B. ../CMake
+sudo make install
+```
+
+Then you must install the RxROS2 library file:
+
+```bash
+git clone https://github.com/rosin-project/rxros2.git
+sudo mkdir -p /usr/local/include/rxros
+sudo cp rxros2/src/rxros2.h /usr/local/include/rxros
+```
+
+## Creating a ROS2 Package
 
 TBD
 
