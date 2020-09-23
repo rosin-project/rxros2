@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>rxros2_cpp_examples</name>
+  <version>0.1.0</version>
+  <description>Example nodes showing how to use rxros2_cpp.</description>
+  <author>Henrik Larsen</author>
+  <maintainer email="henrik7264@outlook.com">Henrik Larsen</maintainer>
+  <maintainer email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn</maintainer>
+  <maintainer email="wasowski@itu.dk">Andrzej Wasowski</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
+
+  <depend>ament_cmake</depend>
+  <depend>std_msgs</depend>
+
+  <build_depend>rxros2_cpp</build_depend>
+  <build_export_depend>rxros2_cpp</build_export_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
