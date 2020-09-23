@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import rclpy
-from rxpy2_listener import rxros2
+import rxros2
 from std_msgs.msg import String
 
 
