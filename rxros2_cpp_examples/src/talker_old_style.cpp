@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 #include "std_msgs/msg/string.hpp"
 using namespace rxcpp::operators;
 using namespace rxros2::operators;

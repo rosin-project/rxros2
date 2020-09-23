@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>rxros2_py</name>
+  <version>0.1.0</version>
+  <description>Reactive programming in Python for ROS 2.</description>
+  <author>Henrik Larsen</author>
+  <maintainer email="henrik7264@outlook.com">Henrik Larsen</maintainer>
+  <maintainer email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn</maintainer>
+  <maintainer email="wasowski@itu.dk">Andrzej Wasowski</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+
+  <!-- for now: we won't be able to release with this -->
+  <exec_depend>python-rx-pip</exec_depend>
+
+  <!-- TODO: add tests -->
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

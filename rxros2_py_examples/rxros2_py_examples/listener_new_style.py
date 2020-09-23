@@ -13,20 +13,26 @@
 # limitations under the License.
 
 import rclpy
-from rxpy2_listener import rxros2
+import rxros2
 from std_msgs.msg import String
+
+
+class Listener(rxros2.Node):
+    def __init__(self):
+        super().__init__("listener")
+
+    def run(self):
+        observable = rxros2.from_topic(self, String, "/chatter")
+        observable.subscribe(
+            lambda s: print("Received {0}".format(s.data)),
+            lambda e: print("Error Occurred: {0}".format(e)),
+            lambda: print("Done!"))
 
 
 def main(args=None):
     rclpy.init(args=args)
-    listener = rxros2.create_node("listener")
-
-    observable = rxros2.from_topic(listener, String, "/chatter")
-    observable.subscribe(
-        lambda s: print("Received2 {0}".format(s.data)),
-        lambda e: print("Error Occurred: {0}".format(e)),
-        lambda: print("Done!"))
-
+    listener = Listener()
+    listener.start()
     rclpy.spin(listener)
     listener.destroy_node()
     rclpy.shutdown()

@@ -14,23 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 #include "std_msgs/msg/string.hpp"
-
-struct Listener: public rxros2::Node {
-    Listener(): rxros2::Node("listener") {};
-
-    void run() {
-        rxros2::observable::from_topic<std_msgs::msg::String>(this, "/chatter", 1000)
-            .subscribe ( [this] (const std_msgs::msg::String::SharedPtr msg) {
-                RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());});
-    }
-};
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
-    auto listener = std::make_shared<Listener>();
-    listener->start();
+    auto listener = rxros2::create_node("listener");
+
+    rxros2::observable::from_topic<std_msgs::msg::String>(listener, "/chatter", 1000)
+        .subscribe ( [listener] (const std_msgs::msg::String::SharedPtr msg) {
+            RCLCPP_INFO(listener->get_logger(), "I heard: '%s'", msg->data.c_str());});
+
     rclcpp::spin(listener);
     rclcpp::shutdown();
     return 0;
