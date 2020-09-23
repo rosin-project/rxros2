@@ -10,6 +10,35 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+
+################################################################################
+# TODO: put a proper vendor package together
+
+include(ExternalProject)
+ExternalProject_Add(rxcpp-6c283f36
+  SOURCE_DIR rxcpp_src
+  URL https://github.com/ReactiveX/RxCpp/archive/v4.1.0.tar.gz
+  URL_MD5 6c283f36ce251f45146f7099aa9ef19a
+  # arbitrary
+  TIMEOUT 60
+  # we copy the headers out of the extracted source directly, so
+  # no need to configure, build or install anything.
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+# NOTE: this places a copy of the RxCpp headers in the public include path
+# of this package. Users who depend on rxros2_cpp probably want access to
+# those headers, but this is not nice, and we should put a proper vendor
+# package together (or find some other way to package RxCpp for ROS 2).
+install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rxcpp_src/Rx/v2/src/rxcpp
+  DESTINATION include
+)
+################################################################################
+
+
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
