@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 #include "std_msgs/msg/string.hpp"
 
 int main(int argc, char **argv) {
