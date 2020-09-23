@@ -9,8 +9,10 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
 * [RxROS2 - reactive Programming for ROS2](#rxros2)
    * [Introduction](#introduction)
    * [Acknowledgement](#acknowledgement)
+   * [Dependencies](#dependencies)
    * [Example Package](#example-package)
    * [Setup and Installation](#setup-and-installation)
+   * [Creating a ROS2 Package](#creating-a-rxros2-package)
    * [Creating a RXOS2 Node](#creating-a-rxros2-node)
        * [Creating a RxROS2 Node using a class](#creating-a-rxros2-node-using-a-class)
        * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -42,11 +44,49 @@ This projects has received funding from the European Union's Horizon 2020 resear
 ![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
 [https://rosin-project.eu](https://rosin-project.eu)
 
+## Dependencies
+The RxROS2 library depends on and uses the following software:<br>
+
+1. Ubuntu Bionic Beaver 18.04 and ROS2 Eloquent Elusor<br>
+2. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy<br>
+3. Reactive Python (RxPy) v3.1.0<br>
+
+Please follow the installation instruction of Ubuntu at
+https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
+
+and the installation instructions of ROS2 at
+https://index.ros.org/doc/ros2/Installation/
+
 ## Example Package
 
 TBD
 
 ## Setup and Installation
+
+The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2. To manually install RxROS2 you must first install a version of RxPy. This is done as follows:
+
+```bash
+pip3 install rx
+```
+
+Then you must install the RxROS2 library file:
+
+```bash
+git clone https://github.com/rosin-project/rxros2.git
+cd rxros2/src
+cat > setup.py
+from setuptools import setup
+
+setup(
+    name='rxros2',
+    version='0.1.0',
+    py_modules=['rxros2']
+)
+^D # Press CTRL+D
+pip3 install .
+```
+
+## Creating a ROS2 Package
 
 TBD
 

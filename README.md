@@ -51,7 +51,7 @@ The RxROS2 library depends on and uses the following software:<br>
 
 1. Ubuntu Bionic Beaver 18.04 and ROS2 Eloquent Elusor<br>
 2. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy<br>
-3. Reactive C++ v2<br>
+3. Reactive C++ (RxCpp) v2<br>
 
 Please follow the installation instruction of Ubuntu at
 https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
