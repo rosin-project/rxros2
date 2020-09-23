@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef RXROS2_INCLUDE_RXROS2_H_
-#define RXROS2_INCLUDE_RXROS2_H_
+#ifndef RXROS2_CPP_INCLUDE_RXROS2_H_
+#define RXROS2_CPP_INCLUDE_RXROS2_H_
 
 #include <linux/input.h>
 #include <fcntl.h>
@@ -413,4 +413,4 @@ namespace rxros2
 } // end namespace rxros2
 
 
-#endif // RXROS2_INCLUDE_RXROS2_H_
+#endif // RXROS2_CPP_INCLUDE_RXROS2_H_
