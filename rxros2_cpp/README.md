@@ -69,7 +69,7 @@ A RxROS2 node is fundamentally a ROS2 node. It can be created in two distinct wa
 The following code shows how a RxROS2 node is created using a class:
 
 ```cpp
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 
 struct MyNode: public rxros2::Node {
     MyNode(): rxros2::Node("my_node") {}
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-Common for all RxROS2 programs is that they include the `rxros/rxros2.h` header file. It contains all the necessary code, including observables and operators, to get started using reactive programming (RxCpp) with ROS2.
+Common for all RxROS2 programs is that they include the `rxros2/rxros2.h` header file. It contains all the necessary code, including observables and operators, to get started using reactive programming (RxCpp) with ROS2.
 
 
 MyNode is defined as `struct` rather than a `class` to take advantage of that all properties and member functions are public. MyNode is further defined as a  `rxros2::Node`. The `rxros2::Node` is a very simple class. It is a sub-class of `rclcpp::Node` and therefore also a ROS2 node. The constructor of the `rxros2::Node` takes the name of the node as argument. In this case "my_node". The `rxros2::Node` has a virtual method named `run` that must be implemented by the sub-class, i.e. MyNode in this case. `rxros2::Node` contains further a function `start`. It will execute the `run` function in a new thread.
@@ -101,7 +101,7 @@ The main function is straight forward: It first initialize rclcpp. Then it creat
 The other other way to create a RxROS2 node is by using the function call `rxros2::create_node`. This is done as follows:
 
 ```cpp
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
@@ -296,7 +296,7 @@ int main(int argc, char **argv) {
 The following example is a full implementation of a keyboard publisher that takes input from a Linux block device and publishes the low-level keyboard events to a ROS2 topic '/keyboard'.
 
 ```cpp
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 #include <rxros2_teleop_msgs/Keyboard.h>
 #include "KeyboardPublisher.h"
 using namespace rxcpp::operators;
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 The following example is a full implementation of a velocity publisher that takes input from a keyboard and joystick and publishes Twist messages on the /cmd_vel topic.
 
 ```cpp
-#include <rxros/rxros2.h>
+#include <rxros2/rxros2.h>
 #include <rxros2_teleop_msgs/Joystick.h>
 #include <rxros2_teleop_msgs/Keyboard.h>
 #include <geometry_msgs/Twist.h>
