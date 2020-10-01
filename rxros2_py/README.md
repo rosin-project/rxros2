@@ -12,7 +12,7 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Dependencies](#dependencies)
    * [Example Package](#example-package)
    * [Setup and Installation](#setup-and-installation)
-   * [Creating a ROS2 Package](#creating-a-rxros2-package)
+   * [Creating a ROS2 Package](#creating-a-ros2-package)
    * [Creating a RXOS2 Node](#creating-a-rxros2-node)
        * [Creating a RxROS2 Node using a class](#creating-a-rxros2-node-using-a-class)
        * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -62,15 +62,15 @@ TBD
 
 ## Setup and Installation
 
-The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2.
+The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2. RxROS2 is originally developed and tested of the Eloquent Elusor platform, but we have not been able to provide proper installation instructions for this platform (see issue #2 for a discussion of the problem). Foxy Fitzroy has therefore become the preferred platform for RxROS2 althogh we have observed a serious issue with rclpy/RxROS2 (see issue #9). 
 
-Installation of rosdep:
+Installation of rosdep (depenency package):
 ```bash
 sudo apt install python3-rosdep
 sudo rosdep init
 ```
 
-Installation of colcon:
+Installation of colcon (dependency package):
 ```bash
 sudo apt install python3-colcon-common-extensions
 ```

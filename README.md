@@ -1,7 +1,6 @@
-# rxros2
+# RxROS2
 
 Reactive programming for ROS 2.
-
 
 ## Overview
 
