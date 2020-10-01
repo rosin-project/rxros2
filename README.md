@@ -78,17 +78,17 @@ colcon build
 
 After having installed RxROS2 try to execute the following RxROS nodes
 
-ros2 run rxros_cpp_examples talker_new_style
-ros2 run rxros_cpp_examples talker_old_style
-ros2 run rxros_py_examples talker_new_style
-ros2 run rxros_py_examples talker_old_style
+ros2 run rxros_cpp_examples talker_new_style<br>
+ros2 run rxros_cpp_examples talker_old_style<br>
+ros2 run rxros_py_examples talker_new_style<br>
+ros2 run rxros_py_examples talker_old_style<br>
 
 The talker nodes can be combined with any of the listener nodes
 
-ros2 run rxros_cpp_examples listener_new_style
-ros2 run rxros_cpp_examples listener_old_style
-ros2 run rxros_py_examples listener_new_style
-ros2 run rxros_py_examples listener_old_style
+ros2 run rxros_cpp_examples listener_new_style<br>
+ros2 run rxros_cpp_examples listener_old_style<br>
+ros2 run rxros_py_examples listener_new_style<br>
+ros2 run rxros_py_examples listener_old_style<br>
 
 ## Creating a ROS2 Package
 
