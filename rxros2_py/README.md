@@ -9,10 +9,6 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
 * [RxROS2 - reactive Programming for ROS2](#rxros2)
    * [Introduction](#introduction)
    * [Acknowledgement](#acknowledgement)
-   * [Dependencies](#dependencies)
-   * [Example Package](#example-package)
-   * [Setup and Installation](#setup-and-installation)
-   * [Creating a ROS2 Package](#creating-a-ros2-package)
    * [Creating a RXOS2 Node](#creating-a-rxros2-node)
        * [Creating a RxROS2 Node using a class](#creating-a-rxros2-node-using-a-class)
        * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -43,52 +39,6 @@ This projects has received funding from the European Union's Horizon 2020 resear
 
 ![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
 [https://rosin-project.eu](https://rosin-project.eu)
-
-## Dependencies
-The RxROS2 library depends on and uses the following software:<br>
-
-1. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy<br>
-2. Reactive Python (RxPy) v3.1.0<br>
-
-Please follow the installation instruction of Ubuntu at
-https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
-
-and the installation instructions of ROS2 at
-https://index.ros.org/doc/ros2/Installation/
-
-## Example Package
-
-TBD
-
-## Setup and Installation
-
-The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2. RxROS2 is originally developed and tested of the Eloquent Elusor platform, but we have not been able to provide proper installation instructions for this platform (see issue #2 for a discussion of the problem). Foxy Fitzroy has therefore become the preferred platform for RxROS2 althogh we have observed a serious issue with rclpy/RxROS2 (see issue #9). 
-
-Installation of rosdep (depenency package):
-```bash
-sudo apt install python3-rosdep
-sudo rosdep init
-```
-
-Installation of colcon (dependency package):
-```bash
-sudo apt install python3-colcon-common-extensions
-```
-
-Installation of RxROS2 for Python and C++:
-```bash
-mkdir -p $HOME/rxros2_ws/src
-cd $HOME/rxros2_ws/src
-git clone https://github.com/rosin-project/rxros2.git
-cd $HOME/rxros2_ws
-rosdep update && sudo apt update
-rosdep install --from-paths $HOME/rxros2_ws --ignore-src --rosdistro=foxy
-colcon build
-```
-
-## Creating a ROS2 Package
-
-TBD
 
 ## Creating a RxROS2 Node
 
