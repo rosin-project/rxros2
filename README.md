@@ -47,7 +47,8 @@ https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
 and the installation instructions of ROS2 at
 https://index.ros.org/doc/ros2/Installation/.
 
-Reactive C++ (RxCpp) and reactive Python (RxPy) will be installed as part of installing RxROS2 (see instructions below)
+Reactive C++ (RxCpp) and reactive Python (RxPy) will be installed as part of installing RxROS2 (see instructions below).
+They do not have to be installed separately.
 
 ## Setup and Installation
 
