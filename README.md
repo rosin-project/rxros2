@@ -52,7 +52,9 @@ They do not have to be installed separately.
 
 ## Setup and Installation
 
-The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2. RxROS2 is originally developed and tested of the Eloquent Elusor platform, but we have not been able to provide proper installation instructions for this platform (see issue #2 for a discussion of the problem). Foxy Fitzroy has therefore become the preferred platform for RxROS2 although we have observed a serious issue with rclpy/RxROS2 for this platform (see issue #9). 
+The current installation instructions are manual, but will soon be replaced by proper packages that will allow easy installation of RxROS2.
+RxROS2 is originally developed and tested of the Eloquent Elusor platform, but we have not been able to provide proper installation instructions for this platform (see [issue 2](https://github.com/rosin-project/rxros2/issues/2) for a discussion of the problem).
+Foxy Fitzroy has therefore become the preferred platform for RxROS2 although we have observed a serious issue with `rclpy` / RxROS2 for this platform (see [issue 9](https://github.com/rosin-project/rxros9/issues/2)).
 
 Installation of rosdep (depenency package):
 ```bash
