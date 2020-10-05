@@ -93,21 +93,35 @@ colcon build
 If this was successful, do not forget to activate the workspace by executing `source $HOME/rxros2_ws/install/setup.bash` (if using Bash as the shell).
 
 
-## Example Package
+## Examples
 
-After having installed RxROS2 try to execute the following RxROS nodes
+After having built RxROS2, you may try to execute any of the following RxROS2 nodes:
 
-ros2 run rxros_cpp_examples talker_new_style<br>
-ros2 run rxros_cpp_examples talker_old_style<br>
-ros2 run rxros_py_examples talker_new_style<br>
-ros2 run rxros_py_examples talker_old_style<br>
+```bash
+# RxROS2+RxCpp based nodes
+ros2 run rxros_cpp_examples talker_new_style
+ros2 run rxros_cpp_examples talker_old_style
 
-The talker nodes can be combined with any of the listener nodes
+# RxROS2+RxPy based nodes
+ros2 run rxros_py_examples talker_new_style
+ros2 run rxros_py_examples talker_old_style
+```
 
-ros2 run rxros_cpp_examples listener_new_style<br>
-ros2 run rxros_cpp_examples listener_old_style<br>
-ros2 run rxros_py_examples listener_new_style<br>
-ros2 run rxros_py_examples listener_old_style<br>
+The talker nodes can be combined with any of the listener nodes:
+
+```bash
+# RxROS2+RxCpp based nodes
+ros2 run rxros_cpp_examples listener_new_style
+ros2 run rxros_cpp_examples listener_old_style
+
+# RxROS2+RxPy based nodes
+ros2 run rxros_py_examples listener_new_style
+ros2 run rxros_py_examples listener_old_style
+```
+
+any combination of `talker` and `listener` should work.
+
+
 
 ## Creating a ROS2 Package
 
