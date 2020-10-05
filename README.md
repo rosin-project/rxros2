@@ -122,7 +122,8 @@ ros2 run rxros_py_examples listener_old_style
 any combination of `talker` and `listener` should work.
 
 
+## Creating an RxROS2 Package
 
-## Creating a ROS2 Package
+We will describe the steps to create a ROS 2 package based on RxROS2 at a later time.
 
-TBD
+In essence these packages are regular ROS 2 packages, they simply depend on `rxros2_cpp` or `rxros2_py`.
