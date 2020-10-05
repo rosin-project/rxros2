@@ -34,11 +34,12 @@ This project has received funding from the European Union’s Horizon 2020 resea
 
 
 ## Dependencies
-The RxROS2 library depends on and uses the following software:<br>
 
-1. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy<br>
-2. Reactive C++ (RxCpp) v4.0<br>
-2. Reactive Python (RxPy) v3.1.0<br>
+The RxROS2 library depends on and uses the following software:
+
+ 1. Ubuntu Focal Fossa 20.04 and ROS2 Foxy Fitzroy
+ 1. Reactive C++ (RxCpp) v4.0
+ 1. Reactive Python (RxPy) v3.1.0
 
 Please follow the installation instruction of Ubuntu at
 https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
