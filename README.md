@@ -72,14 +72,26 @@ sudo apt install python3-colcon-common-extensions
 Build of RxROS2 for Python and C++:
 
 ```bash
+# create a workspace
+# if you already have a workspace, skip this step
 mkdir -p $HOME/rxros2_ws/src
-cd $HOME/rxros2_ws/src
-git clone https://github.com/rosin-project/rxros2.git
 cd $HOME/rxros2_ws
+
+# download the repository
+git clone https://github.com/rosin-project/rxros2.git src/rxros2
+
+# make sure all dependencies are installed
 rosdep update && sudo apt update
 rosdep install --from-paths $HOME/rxros2_ws --ignore-src --rosdistro=foxy
+
+# check the output of 'rosdep install ..' and make sure there were no errors
+
+# build the workspace
 colcon build
 ```
+
+If this was successful, do not forget to activate the workspace by executing `source $HOME/rxros2_ws/install/setup.bash` (if using Bash as the shell).
+
 
 ## Example Package
 
