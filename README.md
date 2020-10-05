@@ -56,18 +56,21 @@ The current installation instructions are manual, but will soon be replaced by p
 RxROS2 is originally developed and tested of the Eloquent Elusor platform, but we have not been able to provide proper installation instructions for this platform (see [issue 2](https://github.com/rosin-project/rxros2/issues/2) for a discussion of the problem).
 Foxy Fitzroy has therefore become the preferred platform for RxROS2 although we have observed a serious issue with `rclpy` / RxROS2 for this platform (see [issue 9](https://github.com/rosin-project/rxros9/issues/2)).
 
-Installation of rosdep (depenency package):
+Installation of `rosdep` (this will resolve our dependencies):
+
 ```bash
 sudo apt install python3-rosdep
 sudo rosdep init
 ```
 
-Installation of colcon (dependency package):
+Installation of `colcon` (build tool):
+
 ```bash
 sudo apt install python3-colcon-common-extensions
 ```
 
-Installation of RxROS2 for Python and C++:
+Build of RxROS2 for Python and C++:
+
 ```bash
 mkdir -p $HOME/rxros2_ws/src
 cd $HOME/rxros2_ws/src
