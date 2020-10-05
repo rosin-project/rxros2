@@ -8,10 +8,7 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
 
    * [RxROS2 - reactive Programming for ROS2](#rxros2)
       * [Introduction](#introduction)
-      * [Acknowledgement](#acknowledgement)
-      * [Dependencies](#dependencies)
-      * [Example Package](#example-package)
-      * [Setup and Installation](#setup-and-installation)
+      * [Acknowledgements](#acknowledgements)
       * [Creating a RxROS2 Node](#creating-a-rxros2-node)
           * [Creating a RxROS2 Node using a Class](#creating-a-rxros2-node-using-a-class)
           * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -34,31 +31,26 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
             * [Example:](#example-5)
       * [Example 1: A Keyboard Publisher](#example-1-a-keyboard-publisher)
       * [Example 2: A Velocity Publisher](#example-2-a-velocity-publisher)
-         
 
-## Acknowledgement
-This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
-[https://rosin-project.eu](https://rosin-project.eu)
+## Acknowledgements
 
-## Dependencies
-The RxROS2 library depends on and uses the following software:<br>
+<!-- 
+    ROSIN acknowledgement from the ROSIN press kit
+    @ https://github.com/rosin-project/press_kit
+-->
 
-1. Ubuntu Bionic 18.04<br>
-2. ROS2 Eloquent Elusor<br>
-3. Reactive C++ v2<br>
-https://github.com/ReactiveX/RxCpp<br>
-Released under the Microsoft Open Source Code of Conduct.<br>
-The RxCpp library (header files) is installed as part of installing RxROS2<br>
+<a href="http://rosin-project.eu">
+  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png" alt="rosin_logo" height="60">
+</a>
 
-## Example Package
+Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 
-TBD
+<img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg" alt="eu_flag" height="45" align="left" >
 
-## Setup and Installation
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement no. 732287.
 
-TBD
 
 ## Creating a RxROS2 Node
 
@@ -69,7 +61,7 @@ A RxROS2 node is fundamentally a ROS2 node. It can be created in two distinct wa
 The following code shows how a RxROS2 node is created using a class:
 
 ```cpp
-#include <rxros2/rxros2.h>
+#include <rxros/rxros2.h>
 
 struct MyNode: public rxros2::Node {
     MyNode(): rxros2::Node("my_node") {}
@@ -89,7 +81,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-Common for all RxROS2 programs is that they include the `rxros2/rxros2.h` header file. It contains all the necessary code, including observables and operators, to get started using reactive programming (RxCpp) with ROS2.
+Common for all RxROS2 programs is that they include the `rxros/rxros2.h` header file. It contains all the necessary code, including observables and operators, to get started using reactive programming (RxCpp) with ROS2.
 
 
 MyNode is defined as `struct` rather than a `class` to take advantage of that all properties and member functions are public. MyNode is further defined as a  `rxros2::Node`. The `rxros2::Node` is a very simple class. It is a sub-class of `rclcpp::Node` and therefore also a ROS2 node. The constructor of the `rxros2::Node` takes the name of the node as argument. In this case "my_node". The `rxros2::Node` has a virtual method named `run` that must be implemented by the sub-class, i.e. MyNode in this case. `rxros2::Node` contains further a function `start`. It will execute the `run` function in a new thread.
@@ -101,7 +93,7 @@ The main function is straight forward: It first initialize rclcpp. Then it creat
 The other other way to create a RxROS2 node is by using the function call `rxros2::create_node`. This is done as follows:
 
 ```cpp
-#include <rxros2/rxros2.h>
+#include <rxros/rxros2.h>
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
@@ -296,7 +288,7 @@ int main(int argc, char **argv) {
 The following example is a full implementation of a keyboard publisher that takes input from a Linux block device and publishes the low-level keyboard events to a ROS2 topic '/keyboard'.
 
 ```cpp
-#include <rxros2/rxros2.h>
+#include <rxros/rxros2.h>
 #include <rxros2_teleop_msgs/Keyboard.h>
 #include "KeyboardPublisher.h"
 using namespace rxcpp::operators;
@@ -346,7 +338,7 @@ int main(int argc, char** argv)
 The following example is a full implementation of a velocity publisher that takes input from a keyboard and joystick and publishes Twist messages on the /cmd_vel topic.
 
 ```cpp
-#include <rxros2/rxros2.h>
+#include <rxros/rxros2.h>
 #include <rxros2_teleop_msgs/Joystick.h>
 #include <rxros2_teleop_msgs/Keyboard.h>
 #include <geometry_msgs/Twist.h>
