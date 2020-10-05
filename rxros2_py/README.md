@@ -8,7 +8,7 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
 
 * [RxROS2 - reactive Programming for ROS2](#rxros2)
    * [Introduction](#introduction)
-   * [Acknowledgement](#acknowledgement)
+   * [Acknowledgements](#acknowledgements)
    * [Creating a RXOS2 Node](#creating-a-rxros2-node)
        * [Creating a RxROS2 Node using a class](#creating-a-rxros2-node-using-a-class)
        * [Creating a RxROS2 Node using the create_node function](#creating-a-rxros2-node-using-the-create_node-function)
@@ -30,11 +30,25 @@ RxROS2 is new API for ROS2 based on the paradigm of reactive programming. Reacti
    * [Example 1: A Topic Listener](#example-1-a-topic-listener)
    * [Example 2: A Topic Publisher](#example-2-a-topic-publisher)
 
-## Acknowledgement
-This projects has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 732287.
 
-![](https://rosin-project.eu/wp-content/uploads/2017/03/EU-Flag-1.png)<br>
-[https://rosin-project.eu](https://rosin-project.eu)
+## Acknowledgements
+
+<!-- 
+    ROSIN acknowledgement from the ROSIN press kit
+    @ https://github.com/rosin-project/press_kit
+-->
+
+<a href="http://rosin-project.eu">
+  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png" alt="rosin_logo" height="60">
+</a>
+
+Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+
+<img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg" alt="eu_flag" height="45" align="left" >
+
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement no. 732287.
+
 
 ## Creating a RxROS2 Node
 
