@@ -2,9 +2,10 @@
 
 This folder contains the RxROS2 Python examples.
 
-The purpose of the examples are to
-1. demonstrate how a RxROS2 Python project is setup and build.
-2. demonstrate how a RxROS2 Python program is composed.
+The purpose of the examples is to:
+
+1. demonstrate how a RxROS2 Python package is setup and build.
+1. demonstrate how a RxROS2 Python program is composed.
 
 The RxROS2 Python examples contains four notes. Two notes demonstrate how to construct a simple `talker` using either a class or the create_note function. The remaining two notes demonstrate how to create a simple `listener` again using either a class or the create_note function.
 
