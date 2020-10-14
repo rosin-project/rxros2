@@ -96,7 +96,7 @@ If this was successful, do not forget to activate the workspace by executing `so
 
 ## Examples
 
-After having built RxROS2, you may try to startup any of the following RxROS2 nodes:
+After having built RxROS2, you may try to start any of the following RxROS2 nodes:
 
 ```bash
 # RxROS2+RxCpp based nodes
