@@ -1,6 +1,6 @@
 # RxROS2 Python Examples
 
-This folder contains the RxROS2 Python examples.
+This package contains the RxROS2 Python examples.
 
 The purpose of the examples is to:
 
