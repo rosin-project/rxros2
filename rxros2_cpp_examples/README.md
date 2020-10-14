@@ -1,6 +1,6 @@
 # RxROS2 C++ Examples
 
-This folder contains the RxROS2 C++ examples.
+This package contains the RxROS2 C++ examples.
 
 The purpose of the examples are to
 1. demonstrate how a RxROS2 C++ project is setup and build.
