@@ -2,9 +2,10 @@
 
 This package contains the RxROS2 C++ examples.
 
-The purpose of the examples are to
-1. demonstrate how a RxROS2 C++ project is setup and build.
-2. demonstrate how a RxROS2 C++ program is composed.
+The purpose of the examples is to:
+
+1. demonstrate how a RxROS2 C++ pakage is setup and build.
+1. demonstrate how a RxROS2 C++ program is composed.
 
 The RxROS2 C++ examples contains four notes. Two notes demonstrate how to construct a simple `talker` using either a class or the create_note function. The remaining two notes demonstrate how to create a simple `listener` again using either a class or the create_note function.
 
