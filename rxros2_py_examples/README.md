@@ -11,7 +11,7 @@ The RxROS2 Python examples contains four nodes. Two nodes demonstrate how to con
 
 ## Setup and Installation
 
-Please follow the installation instruction of the RxROS2 main page. Part of building the rxros2_ws also includes building the examples. After having completed the `colcon` command it will possible to startup the nodes as described in the next section.
+Please follow the installation instructions on the RxROS2 main page. The examples will be built as part of the main build. After having completed the `colcon` command you can to start the nodes  as described in the next section.
 
 ## Starting the RxROS2 Python Nodes
 
