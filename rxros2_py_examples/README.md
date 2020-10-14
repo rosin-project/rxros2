@@ -23,7 +23,7 @@ ros2 run rxros2_py_examples talker_new_style
 ros2 run rxros2_py_examples talker_old_style
 ```
 
-The talker nodes can be combined with any of the listener nodes:
+The `talker` nodes can be combined with any of the `listener` nodes:
 
 ```bash
 # RxROS2+RxCpp based nodes
