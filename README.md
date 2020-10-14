@@ -16,7 +16,7 @@ For more information on the design and use of `rxros2`, please see the `README.m
 
 ## Acknowledgements
 
-<!-- 
+<!--
     ROSIN acknowledgement from the ROSIN press kit
     @ https://github.com/rosin-project/press_kit
 -->
@@ -96,28 +96,28 @@ If this was successful, do not forget to activate the workspace by executing `so
 
 ## Examples
 
-After having built RxROS2, you may try to execute any of the following RxROS2 nodes:
+After having built RxROS2, you may try to start any of the following RxROS2 nodes:
 
 ```bash
 # RxROS2+RxCpp based nodes
-ros2 run rxros_cpp_examples talker_new_style
-ros2 run rxros_cpp_examples talker_old_style
+ros2 run rxros2_cpp_examples talker_new_style
+ros2 run rxros2_cpp_examples talker_old_style
 
 # RxROS2+RxPy based nodes
-ros2 run rxros_py_examples talker_new_style
-ros2 run rxros_py_examples talker_old_style
+ros2 run rxros2_py_examples talker_new_style
+ros2 run rxros2_py_examples talker_old_style
 ```
 
 The talker nodes can be combined with any of the listener nodes:
 
 ```bash
 # RxROS2+RxCpp based nodes
-ros2 run rxros_cpp_examples listener_new_style
-ros2 run rxros_cpp_examples listener_old_style
+ros2 run rxros2_cpp_examples listener_new_style
+ros2 run rxros2_cpp_examples listener_old_style
 
 # RxROS2+RxPy based nodes
-ros2 run rxros_py_examples listener_new_style
-ros2 run rxros_py_examples listener_old_style
+ros2 run rxros2_py_examples listener_new_style
+ros2 run rxros2_py_examples listener_old_style
 ```
 
 any combination of `talker` and `listener` should work.
