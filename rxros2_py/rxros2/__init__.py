@@ -23,6 +23,7 @@ from rx.operators import *
 from rx.disposable import Disposable
 from rclpy.node import Node as ROS2Node
 from rclpy.action import ActionClient, ActionServer
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Node(ROS2Node):
@@ -35,13 +36,14 @@ class Node(ROS2Node):
         :param node_name: The name of the node.
         """
         super().__init__(node_name)
+        self.myExecutor = ThreadPoolExecutor(max_workers=1)
 
     @abstractmethod
     def run(self):
         pass
 
     def start(self):
-        threading.Thread(target=self.run).start()
+        self.myExecutor.submit(self.run())
 
 
 def create_node(node_name: str) -> ROS2Node:
